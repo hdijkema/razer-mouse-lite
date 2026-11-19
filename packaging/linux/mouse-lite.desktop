@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Razer Mouse Lite
+Comment=Mouse profiles, DPI and lighting
+Exec=razer-mouse
+Icon=razer-mouse-lite
+Terminal=false
+Categories=Settings;HardwareSettings;
+StartupWMClass=MouseLite

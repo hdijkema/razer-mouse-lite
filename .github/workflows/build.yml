@@ -1,0 +1,144 @@
+﻿name: Build and release
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version X.Y.Z (empty = build only)'
+        required: false
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}-${{ inputs.version }}
+  cancel-in-progress: false
+jobs:
+  version:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      publish: ${{ steps.version.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Resolve version and release intent
+        id: version
+        shell: pwsh
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+        run: |
+          $release = ./tools/release-version.ps1 -EventName $env:GITHUB_EVENT_NAME -RefType $env:GITHUB_REF_TYPE -RefName $env:GITHUB_REF_NAME -RequestedVersion $env:REQUESTED_VERSION
+          "version=$($release.Version)" >> $env:GITHUB_OUTPUT
+          "tag=$($release.Tag)" >> $env:GITHUB_OUTPUT
+          "publish=$($release.Publish.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+      - name: Test release version handling
+        shell: pwsh
+        run: ./tests/test-release-version.ps1
+  windows:
+    needs: version
+    runs-on: windows-2022
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          arch: win64_msvc2022_64
+          cache: true
+      - name: Install pinned Inno Setup compiler
+        shell: pwsh
+        run: ./tools/install-inno-setup.ps1
+      - name: Build, test and package ZIP and installer
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ needs.version.outputs.version }}
+        run: ./build.ps1 -Qt $env:QT_ROOT_DIR -CMake cmake -BuildDirectory ./build/ci -Version $env:RELEASE_VERSION -InnoCompiler ./build/tools/inno-setup/ISCC.exe -TestInstaller
+      - name: Upload Windows packages
+        uses: actions/upload-artifact@v6
+        with:
+          name: razer-mouse-lite-windows-x64
+          path: |
+            release/*-windows-x64.zip
+            release/*-windows-x64-setup.exe
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: windows-test-output
+          path: |
+            build/ci/preview-*.png
+            build/ci/Testing/Temporary/LastTest.log
+            build/packaging-*/startup.png
+            build/packaging-*/installer-build.txt
+            build/installer-test-*/*.log
+          if-no-files-found: ignore
+  linux:
+    needs: version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install build dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++ qt6-base-dev qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools libudev-dev fonts-dejavu-core dpkg-dev
+      - name: Configure and build
+        env:
+          RELEASE_VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          cmake -S . -B build/ci -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DMOUSE_LITE_VERSION="$RELEASE_VERSION"
+          cmake --build build/ci --parallel 2
+      - name: Refresh translation source discovery
+        run: /usr/lib/qt6/bin/lupdate src -no-obsolete -ts translations/*.ts
+      - name: Test and build Debian package
+        run: |
+          ctest --test-dir build/ci --output-on-failure
+          mkdir -p release
+          cd build/ci
+          cpack -G DEB -B ../../release
+      - name: Upload Linux package
+        uses: actions/upload-artifact@v6
+        with:
+          name: razer-mouse-lite-linux-x86_64
+          path: release/*-linux-x86_64.deb
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: linux-test-output
+          path: |
+            build/ci/preview-*.png
+            build/ci/Testing/Temporary/LastTest.log
+          if-no-files-found: ignore
+  release:
+    needs: [version, windows, linux]
+    if: needs.version.outputs.publish == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: razer-mouse-lite-*
+          merge-multiple: true
+          path: release
+      - name: Publish complete release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.version.outputs.tag }}
+          RELEASE_VERSION: ${{ needs.version.outputs.version }}
+        run: bash tools/publish-release.sh release
