@@ -28,6 +28,7 @@ if (!$redist) { throw 'The MSVC runtime is missing.' }
 Copy-Item -Path "$($redist.FullName)/x64/Microsoft.VC143.CRT/*.dll" -Destination $application
 Copy-Item -LiteralPath "$project/LICENSE", "$project/README.md", "$project/THIRD_PARTY.md" -Destination $application
 Copy-Item -LiteralPath "$project/licenses" -Destination $application -Recurse
+Copy-Item -LiteralPath "$project/docs" -Destination $application -Recurse
 @('[Paths]', 'Prefix=.', 'Plugins=.') | Set-Content "$application/qt.conf" -Encoding ASCII
 
 # Test the distributable with development DLL and plugin paths removed.
