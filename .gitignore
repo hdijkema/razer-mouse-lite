@@ -66,3 +66,10 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# Local packages and build tools
+/dist/
+/release/
+/downloads/
+/.qtcreator/
+*.user

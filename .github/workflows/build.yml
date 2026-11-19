@@ -37,6 +37,18 @@ jobs:
       - name: Test release version handling
         shell: pwsh
         run: ./tests/test-release-version.ps1
+      - name: Validate workflow and release script
+        shell: bash
+        run: |
+          base=https://github.com/rhysd/actionlint/releases/download/v1.7.12
+          curl --fail --location --retry 3 "$base/actionlint_1.7.12_linux_amd64.tar.gz" -o "$RUNNER_TEMP/actionlint.tar.gz"
+          curl --fail --location --retry 3 "$base/actionlint_1.7.12_checksums.txt" -o "$RUNNER_TEMP/actionlint-checksums.txt"
+          expected=$(awk '$2 == "actionlint_1.7.12_linux_amd64.tar.gz" {print $1}' "$RUNNER_TEMP/actionlint-checksums.txt")
+          test -n "$expected"
+          printf '%s  %s\n' "$expected" "$RUNNER_TEMP/actionlint.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint" -shellcheck= -pyflakes= .github/workflows/build.yml
+          bash -n tools/publish-release.sh
   windows:
     needs: version
     runs-on: windows-2022
@@ -89,7 +101,9 @@ jobs:
         with:
           persist-credentials: false
       - name: Install build dependencies
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++ qt6-base-dev qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools libudev-dev fonts-dejavu-core dpkg-dev
+        run: |
+          sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+          sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends cmake ninja-build g++ qt6-base-dev qt6-qpa-plugins qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools libudev-dev fonts-dejavu-core dpkg-dev
       - name: Configure and build
         env:
           RELEASE_VERSION: ${{ needs.version.outputs.version }}

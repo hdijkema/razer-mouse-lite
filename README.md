@@ -1,148 +1,161 @@
-# Razer Mouse Lite
+﻿# Razer Mouse Lite
 
-Compacte muisinstellingen in C++17 en Qt 6 Widgets, met afzonderlijke modules voor
-Windows en Linux. Geen accounts, advertenties, webview, Python-runtime of service.
+**Your mouse settings should not need a software suite.**
 
-## Gebruik
+A focused, unofficial Razer mouse settings app for Windows and Linux, written in
+C++ and Qt Widgets. Set your DPI, choose a color, save a profile, and get back to
+what you were doing.
 
-Windows: start `dist/razer-mouse.exe`. De bedrade Razer Cobra wordt automatisch
-herkend (USB 1532:00A3). Profielen bevatten DPI, pollingfrequentie, desktopaanwijzer,
-verlichtingskleur en helderheid. De Cobra ondersteunt 100–8500 DPI en
-125/500/1000 Hz. De ingebouwde databank bevat 114 USB-muismodellen; andere modellen
-zijn niet allemaal op echte hardware getest. Bluetooth wordt niet ondersteund.
+[Downloads](https://github.com/hdijkema/razer-mouse-lite/releases) ·
+[Builds and tests](https://github.com/hdijkema/razer-mouse-lite/actions/workflows/build.yml) ·
+[Report an issue](https://github.com/hdijkema/razer-mouse-lite/issues)
 
-Klik op een profiel voor direct toepassen. Bewerk een profiel met **Opslaan** of
-**Opslaan en toepassen**. Bewaar wijzigingen voordat je een ander profiel kiest.
-**Behouden** laat de huidige pollingfrequentie of verlichting staan.
+![Razer Mouse Lite settings window](docs/images/settings.png)
 
-Een linksklik op het trayicoon kiest het volgende profiel, dubbelklikken opent het
-venster en rechtsklikken opent het profielmenu. Het kruisje verbergt het venster;
-**Afsluiten** in het traymenu sluit de app. Op desktops zonder trayondersteuning
-blijft het venster beschikbaar en sluit het kruisje de app af.
+## Why this exists
 
-**Start bij aanmelden** regelt automatisch starten in de tray. Windows gebruikt
-de Run-sleutel van de huidige gebruiker. Linux gebruikt een XDG-autostartbestand
-in `~/.config/autostart/mouse-lite.desktop`. Plaats de executable op de definitieve
-plek voordat je dit aanzet. Na verplaatsen: schakel de optie uit en weer in.
-**Actief profiel herstellen** past het laatste actieve profiel toe bij starten en
-opnieuw aansluiten. De optie staat aanvankelijk uit.
+If all you want is a different DPI, pointer acceleration, or a less distracting
+LED, a large peripheral-management suite can feel like a lot of software for a
+small job. Razer Mouse Lite keeps that job small:
 
-Gebruik één muisbeheerprogramma tegelijk. Een profiel wordt pas actief gemarkeerd
-nadat de muis de commando's heeft bevestigd. Bij een fout kunnen eerdere
-hardwarecommando's al zijn uitgevoerd; hardware-instellingen worden niet
-teruggedraaid.
+- One settings window and local profiles.
+- A tray menu for switching profiles.
+- No account, cloud sync, advertising, promotional pop-ups, or telemetry.
+- No webview, bundled browser, background service, or Python runtime.
+- No application update checker or other application-initiated internet requests.
+- Start at login only if you enable it. Restore your last profile only if you enable that too.
 
-Macro's, knoptoewijzing, muismatkalibratie, RGB-animaties en DPI-stages op de fysieke
-DPI-knop zijn niet geïmplementeerd. Elk app-profiel stelt één DPI-waarde in voor
-beide assen. De Cobra-verlichtingszone heet in de referentie `logo`.
+This is the kind of frustration people describe in Reddit discussions about
+[large downloads and internet access just to change DPI](https://www.reddit.com/r/razer/comments/188uucx/to_change_the_dpi_settings_of_my_new_razer_mouse/),
+[advertisements inside Synapse](https://www.reddit.com/r/assholedesign/comments/15x6ub0/they_added_ads_into_my_mouse_software_razer/),
+and [unwanted extras when adjusting mouse settings](https://www.reddit.com/r/razer/comments/1gr3563/razer_snypase_breaking_my_mouse/).
+These are individual users' reports about particular versions and setups, not
+benchmarks or a claim that every current Synapse installation behaves the same way.
 
-## Talen
+Here, **less bloat means a deliberately smaller scope**. Qt still ships runtime
+libraries, and this project does not claim unmeasured RAM usage, startup times,
+or performance improvements over Synapse.
 
-De interface, foutmeldingen en traymenu's zijn vertaald in Engels, Nederlands,
-Duits, Deens, Noors (Bokmål), Zweeds, Frans en Spaans. Standaard volgt de app de
-systeemtaal; voor andere talen wordt Engels gebruikt. Kies een andere taal onderaan
-het venster en herstart de app. Bestaande profielnamen blijven behouden.
-Native systeemdialogen volgen eventueel de taal van het besturingssysteem.
+## What you can do
 
-Voor een eenmalige taalkeuze: `razer-mouse --language de`. Geldige codes:
-`en`, `nl`, `de`, `da`, `nb`, `sv`, `fr`, `es`. `no` wordt herkend als `nb`.
+| Setting | What the app provides |
+| --- | --- |
+| DPI | One sensitivity value per profile, applied to both axes |
+| Polling rate | Keep the current value, or select 125 / 500 / 1000 Hz on supported models |
+| Desktop pointer | Speed and acceleration; availability depends on the operating system |
+| Lighting | A static color, brightness, off, or keep the current lighting |
+| Profiles | Create, edit, save, delete, and apply with one click |
+| Tray | Left-click for the next profile, double-click for settings, right-click for the menu |
+| Startup | Separate checkboxes for starting at login and restoring the active profile |
 
-## Linux
+The app communicates directly with the mouse through native HID APIs. Synapse
+and an OpenRazer daemon are not required. Close other mouse-control software
+before applying settings so the applications do not overwrite each other.
 
-De Linux-backend gebruikt `libudev` en `hidraw` voor apparaatdetectie en HID feature
-reports. OpenRazer of een Python-daemon is niet nodig. De muis moet via de gewone
-HID-driver als `/dev/hidraw*` beschikbaar zijn. Een andere driver die de interface
-claimt, of andere software die tegelijk commando's stuurt, kan de werking verhinderen.
+Macros, button remapping, per-game automation, firmware updates, surface
+calibration, RGB animation editors, and programming the physical DPI button's
+stages are outside the current scope.
 
-De meegeleverde udev-regel geeft de actieve lokale desktopsessie toegang tot de
-bekende Razer-muismodellen. Je hoeft de app niet als root te starten:
+## Download and use
 
-```sh
-sudo install -m 644 packaging/linux/70-mouse-lite.rules /etc/udev/rules.d/70-mouse-lite.rules
-sudo udevadm control --reload-rules
-# Trek de muis los en sluit hem opnieuw aan.
-```
+### Windows x64
 
-Op X11 kan de app via het optionele programma `xinput` snelheid en acceleratie van
-de geselecteerde libinput-muis instellen. Op Wayland worden deze desktopinstellingen
-door de compositor beheerd; de app schakelt die bediening uit en meldt de beperking.
-DPI, pollingfrequentie, verlichting en profielen blijven daarvan onafhankelijk.
-Op Windows gelden de aanwijzerinstellingen voor alle muizen. Games met raw input
-kunnen desktopaanwijzerinstellingen negeren.
+Open [Releases](https://github.com/hdijkema/razer-mouse-lite/releases) and choose:
 
-## Bouwen en testen
+- **`razer-mouse-lite-<version>-windows-x64-setup.exe`** for installation.
+- **`razer-mouse-lite-<version>-windows-x64.zip`** for a portable copy.
 
-Benodigd: CMake 3.21+, C++17-compiler en Qt 6.4+ met Widgets, Network, Concurrent en
-LinguistTools. Linux vereist daarnaast `libudev-dev` en `pkg-config`.
+The installer offers **just me** and **all users**. Only the all-users option
+requires administrator rights. The ZIP includes the required Qt and MSVC runtime
+files; extract the whole folder and run `razer-mouse.exe`.
 
-Windows met Visual Studio 2022 en de lokaal geïnstalleerde Qt:
+No release listed yet? Successful runs on the
+[Actions page](https://github.com/hdijkema/razer-mouse-lite/actions/workflows/build.yml)
+provide downloadable build artifacts.
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
-```
+1. Connect your mouse over USB. It is detected automatically.
+2. Select a profile, adjust the settings, and choose **Save and apply**.
+3. Click another profile to apply its saved settings immediately.
+4. Optionally enable **Start at login** and **Restore active profile on startup / reconnect**.
 
-`build.ps1` heeft parameters voor Qt en CMake en maakt `dist/` met Qt en de
-MSVC-runtime. De app en Linux-backend zijn volledig C++; PowerShell is alleen
-bouwgereedschap. De ingebouwde databank staat al in de broncode.
+**Save** stores a profile without applying it. Save edits before switching
+profiles. Closing the window hides it in the tray; choose **Quit** in the tray
+menu to exit. On desktops without tray support, closing the window exits the app.
 
-Ubuntu 24.04 / Debian met Qt 6.4 of nieuwer:
+The autostart setting belongs to the current Windows user, even with an all-users
+installation. For a portable copy, put the folder in its final location before
+enabling autostart. After moving it, switch autostart off and on to update its path.
 
-```sh
-sudo apt install build-essential cmake ninja-build pkg-config libudev-dev \
-    qt6-base-dev qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools
-# Optioneel voor desktopaanwijzerinstellingen op X11:
-sudo apt install xinput
-cmake -S . -B build/linux -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build/linux --parallel
-ctest --test-dir build/linux --output-on-failure
-./build/linux/razer-mouse
-# Optioneel: installatie in je eigen gebruikersmap
-cmake --install build/linux --prefix "$HOME/.local"
-```
+### Linux
 
-Andere besturingssystemen worden bewust door CMake geweigerd totdat er een eigen
-platformimplementatie is. `.github/workflows/build.yml` bouwt Windows en Linux
-apart en voert de protocoltests, vertaalcontroles en acht venstertests uit.
-De workflow wordt pas uitgevoerd zodra dit project in een GitHub-repository staat.
+The workflow produces a **DEB built for Ubuntu 24.04 x86-64**. Other distributions
+can build from source. Linux support uses `libudev` and `hidraw`; physical Linux
+mouse testing is still needed in addition to CI.
 
-```sh
-razer-mouse --self-test --language en
-razer-mouse --probe
-razer-mouse --smoke-test preview.png --language fr
-razer-mouse --tray
-```
+The supplied udev rule grants the active local desktop session access to known
+Razer mouse models. See [Linux setup](docs/BUILDING.md#linux) for installation.
+Run the app as your normal user.
 
-De tests veranderen geen muis-, aanwijzer- of opstartinstellingen. `--probe` vraagt
-alleen de huidige DPI van een bedrade Cobra op. De smoke-test past geen profiel toe.
-De zelftest controleert onder meer alle 458 verlichtingpakketten, exacte
-Cobra-commando's, responsevalidatie, HID-descriptors, profielmigratie, atomische
-opslag, XDG-opstartbestanden en alle vertalingen en placeholders.
+On X11, desktop pointer speed and acceleration use the optional `xinput` utility
+and apply to the selected libinput mouse. On Wayland, those controls are disabled:
+your desktop/compositor manages them. DPI, polling, and lighting are independent
+of that limitation. On Windows, desktop pointer settings affect all mice.
+Games using raw input may ignore desktop pointer settings.
 
-## Bronstructuur en portabiliteit
+## Device support and current limits
 
-- `src/core/`: profielen, HID-descriptorparser en Razer-protocol; alleen Qt Core/Gui.
-- `src/platform/`: de platforminterface, met aparte Windows- en Linux-backends.
-- `src/device/`: gedeelde commandoafhandeling en toepassen van profielen.
-- `src/ui/`: Qt Widgets-interface en taalbeheer; geen Windows- of Linux-headers.
-- `src/app/`: starten en één actieve applicatie-instantie.
-- `translations/`: bewerkbare Qt Linguist TS-bestanden; QM-bestanden worden ingebed.
-- `tests/`: controles op protocollen, opslag, platformhulpfuncties en vertalingen.
-- `packaging/linux/`: desktopbestand en udev-regels.
+The wired **Razer Cobra, USB `1532:00A3`**, is the hardware reference for this
+project: 100–8500 DPI, static lighting, brightness, and 125/500/1000 Hz polling.
+The Windows backend has been exercised with this mouse, including reading its
+current DPI. Automated packet tests also check its exact protocol messages.
 
-De vier modules zijn zelfstandige CMake-targets met expliciete afhankelijkheden.
-Een nieuwe backend implementeert `src/platform/platform.h`; de gedeelde code
-hoeft daarvoor geen native OS-headers te importeren.
+The embedded database describes **114 USB mouse models** derived from OpenRazer
+and openrazer-win. A database entry does **not** mean that every feature has been
+verified on that model. Bluetooth is not supported.
 
-De opslag gebruikt Qt AppConfigLocation:
-Windows `%LOCALAPPDATA%/MouseLite/MouseLite/profiles.json`, Linux doorgaans
-`~/.config/MouseLite/MouseLite/profiles.json`. Profielbestanden zijn overdraagbaar;
-het apparaatpad is lokaal en wordt opnieuw gedetecteerd. Het oude veld
-`windowsSettings` wordt bij het lezen gemigreerd naar `pointerSettings`.
-Een beschadigd profielbestand wordt niet automatisch overschreven.
+If a command fails, the app reports the error rather than marking the profile as
+successfully applied. Earlier hardware commands may already have taken effect;
+there is no automatic hardware rollback.
 
-Werk vertaalteksten bij met Qt Linguist en `lupdate`. Bij nieuwe bronteksten moeten
-alle acht TS-bestanden en `data/messages.json` worden bijgewerkt. De tests weigeren
-ontbrekende vertalingen, ongeldige placeholders en verschillen met dit manifest.
+When reporting a device issue, include the model, USB product ID, connection type,
+operating system, and the error shown in the app.
 
-Protocol en databank zijn afgeleid van OpenRazer/openrazer-win. Zie
-`THIRD_PARTY.md` en `LICENSE` (GPL-2.0-or-later).
+## Languages and local data
+
+English, Dutch, German, Danish, Norwegian Bokmål, Swedish, French, and Spanish are
+included. The app follows your system language, with English as the fallback.
+Choose a different language in settings and restart the app to apply it. Existing
+profile names are your own text and are not translated. Native system dialogs may
+follow the operating system's language.
+
+Profiles are stored locally as JSON:
+
+| Platform | Default location |
+| --- | --- |
+| Windows | `%LOCALAPPDATA%/MouseLite/MouseLite/profiles.json` |
+| Linux | `~/.config/MouseLite/MouseLite/profiles.json` |
+
+The historical `MouseLite` storage name is retained so upgrades keep existing
+profiles. Saves use atomic file replacement. A corrupt profile file is reported
+and is not silently overwritten. The installer and uninstaller preserve profiles.
+
+## Build, test, and release
+
+See [BUILDING.md](docs/BUILDING.md) for Windows and Linux dependencies, local
+builds, Inno Setup packaging, testing, and GitHub Actions.
+
+Every push and pull request builds both platforms and runs the tests. A numeric
+tag such as `v0.3.0`, or a manual workflow run with a version, publishes a GitHub
+Release only after both platform jobs succeed. An ordinary branch push does not
+publish a release.
+
+## Credits and license
+
+Razer Mouse Lite is an independent project and is not affiliated with or endorsed
+by Razer. Razer and Synapse names and the reused Synapse icon belong to Razer; the
+icon is not covered by the project's GPL license.
+
+The code is **GPL-2.0-or-later**. Protocol and device information are adapted from
+[OpenRazer](https://github.com/openrazer/openrazer) and
+[openrazer-win](https://github.com/Ar4ikov/openrazer-win).
+See [LICENSE](LICENSE) and [THIRD_PARTY.md](THIRD_PARTY.md).

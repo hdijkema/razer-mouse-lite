@@ -7,6 +7,10 @@
     [switch]$TestInstaller
 )
 $ErrorActionPreference = 'Stop'
+if (![System.IO.Path]::IsPathRooted($BuildDirectory)) {
+    $BuildDirectory = Join-Path (Get-Location).ProviderPath $BuildDirectory
+}
+$BuildDirectory = [System.IO.Path]::GetFullPath($BuildDirectory)
 if (!$Version) { $Version = (& "$PSScriptRoot/tools/release-version.ps1").Version }
 function Run([string]$Program, [string[]]$Arguments) {
     & $Program @Arguments

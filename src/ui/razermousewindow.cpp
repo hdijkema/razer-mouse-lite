@@ -4,6 +4,7 @@
 #include <QCloseEvent>
 #include <QColorDialog>
 #include <QComboBox>
+#include <QDir>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -42,7 +43,11 @@ QIcon RazerMouseWindow::mouseIcon(const QColor &color)
     return QIcon(image);
 }
 
-RazerMouseWindow::RazerMouseWindow(QWidget *parent, bool preview) : QMainWindow(parent), preview(preview)
+RazerMouseWindow::RazerMouseWindow(QWidget *parent, bool preview)
+    : QMainWindow(parent)
+    // Screenshots and CI previews use fresh sample profiles, never personal data.
+    , store(preview ? QDir::tempPath() + "/RazerMouseLite-preview-" + QUuid::createUuid().toString(QUuid::WithoutBraces) + "/profiles.json" : QString())
+    , preview(preview)
 {
     QString error;
     if (!store.load(&error)) readOnly = true;

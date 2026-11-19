@@ -1,7 +1,7 @@
 param([string]$EventName = '', [string]$RefType = '', [string]$RefName = '', [string]$RequestedVersion = '')
 $ErrorActionPreference = 'Stop'
 $project = Get-Content (Join-Path $PSScriptRoot '../CMakeLists.txt') -Raw
-if ($project -notmatch 'project\(razer-mouse VERSION ([0-9]+\.[0-9]+\.[0-9]+)') { throw 'Project version is missing.' }
+if ($project -notmatch 'project\(razer-mouse-lite VERSION ([0-9]+\.[0-9]+\.[0-9]+)') { throw 'Project version is missing.' }
 $version = $Matches[1]
 $tag = ''
 $publish = $false
