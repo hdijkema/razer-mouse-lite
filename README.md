@@ -135,6 +135,11 @@ Our database is converted from openrazer-win's OpenRazer-derived data, not a fil
 distributed by OpenRazer itself. New protocol behaviour still needs an app update.
 The app works offline; this optional button contacts GitHub only when requested.
 
+A weekly GitHub Action checks OpenRazer's mouse-related source files. Relevant
+changes are converted and tested; only changed definitions produce a draft update
+PR. Nothing is merged or published automatically. This picks up fixes for existing
+mice as well as new models, without making an update PR for every upstream commit.
+
 If a command fails, the app reports the error rather than marking the profile as
 successfully applied. Earlier hardware commands may already have taken effect;
 there is no automatic hardware rollback.

@@ -180,8 +180,11 @@ are migrated when read to the portable `pointerSettings` field.
 `tools/import-reference.ps1` converts the locally supplied openrazer-win device
 and recipe data into our compact `data/mice.json`. OpenRazer's original definitions
 are C driver code and Python device classes, not this JSON format. Review changes
-to the importer when updating the reference: recipe indices and protocol behaviour
-can change. Run the complete tests before publishing database changes to `main`.
+to the importer when updating the reference: protocol behaviour can change.
+`tools/dpi-recipes.json` records reviewed DPI recipe fingerprints, so reordering
+the upstream recipe pool cannot silently change DPI commands. Unknown DPI recipes
+stop the importer before it writes the output. Run the complete tests before
+publishing database changes to `main`.
 The C++ validator rejects protocol functions it does not implement, malformed
 recipes, duplicate product IDs, invalid ranges and downloads larger than 2 MiB.
 
@@ -192,3 +195,47 @@ the app version; a different app version or invalid cache falls back to the bund
 definitions. Reinstalling or upgrading the app therefore cannot accidentally use
 definitions cached for a different engine version. Tests use temporary directories
 and the bundled database rather than a user's saved definitions.
+
+### Weekly OpenRazer check
+
+`.github/workflows/sync-openrazer.yml` runs Mondays at 05:17 UTC and can also be
+started from **Actions → Check OpenRazer mouse updates → Run workflow**. It tracks
+the mouse driver/header and daemon mouse/base classes in OpenRazer's `master`
+branch. Without relevant source changes it skips conversion and building. If
+conversion produces identical definitions, it opens no PR.
+
+The workflow reads OpenRazer itself. It uses three generator files from a pinned
+openrazer-win commit to extract and translate that checkout; pending patches from
+the Windows port are excluded. Python is a CI tool for these external generators,
+not an application dependency. Our app and database validator remain C++.
+
+`data/openrazer-source.json` records the pinned converter, source revision and
+file fingerprints. A null revision bootstraps the first direct OpenRazer sync.
+Changes to the shared packet builders/transport headers stop the automation for
+manual C++ review (a driver version-string bump alone is ignored). New DPI recipe
+shapes also require review. Conversion diagnostics are retained as artifacts.
+
+Changed candidates are compiled and run through all CTest checks before a separate
+job with write permissions creates or refreshes the single draft PR branch
+`automation/openrazer-mice`. Only the two database/checkpoint files enter the PR;
+upstream code executes in the read-only conversion job. No automatic merge is set.
+After the PR is merged, the app's update button can fetch the new definitions.
+
+The default `GITHUB_TOKEN` does not trigger ordinary push/PR workflows for bot
+commits. The action explicitly dispatches `build.yml` for the candidate branch,
+so Windows, Ubuntu and Debian 13 builds still run without a personal access token.
+GitHub must allow Actions to create PRs in **Settings → Actions → General →
+Workflow permissions → Allow GitHub Actions to create and approve pull requests**.
+The workflow only creates PRs; it never approves them.
+
+To reproduce conversion in a clean checkout, clone OpenRazer and the converter
+revision from the checkpoint, then run:
+
+```sh
+pwsh ./tools/sync-openrazer.ps1 -Upstream /path/to/openrazer -CheckOnly
+pwsh ./tests/test-import-reference.ps1 -Reference /path/to/openrazer-win
+pwsh ./tools/sync-openrazer.ps1 -Upstream /path/to/openrazer -Converter /path/to/openrazer-win
+```
+
+The last command updates candidate data in that checkout when definitions differ.
+Build and run CTest before merging it.

@@ -1,0 +1,54 @@
+{
+    "format":  1,
+    "description":  "Reviewed DPI recipe fingerprints from openrazer-win 1.6.6. Pool indices are intentionally not used.",
+    "recipes":  [
+                    {
+                        "signature":  "d4225428ec00bec635b3cc4ed82dd20932855f3d5940decf0b3876a8413c5b98",
+                        "supported":  false,
+                        "byteDpi":  false,
+                        "transaction":  31
+                    },
+                    {
+                        "signature":  "34316546cf91b53ed7d960d25780e7517b5496f544e8d987e768601892bc92d9",
+                        "supported":  true,
+                        "byteDpi":  true,
+                        "transaction":  255
+                    },
+                    {
+                        "signature":  "ec6cb956ef3367983cb90fd19ba6ee84d2625f45dcee533de18cabd869fc9c6d",
+                        "supported":  false,
+                        "byteDpi":  false,
+                        "transaction":  31
+                    },
+                    {
+                        "signature":  "4395589642a55b6c8cd1c3eb8d4c238b0f18bffb20d139e236ca09f03381c389",
+                        "supported":  true,
+                        "byteDpi":  false,
+                        "transaction":  255
+                    },
+                    {
+                        "signature":  "48353930a5d810ed189e2dba74e995100127a3bee940de9336445566fe786cbc",
+                        "supported":  true,
+                        "byteDpi":  false,
+                        "transaction":  255
+                    },
+                    {
+                        "signature":  "74e339e19b52cddb6e94e4ead34706bc702d8534f7b5acab893592a6f7ef2718",
+                        "supported":  true,
+                        "byteDpi":  false,
+                        "transaction":  63
+                    },
+                    {
+                        "signature":  "0af64c32e354ad20b3107fdd75895ba4428cccfb70e2ffc3c33109cfc9e6a45b",
+                        "supported":  true,
+                        "byteDpi":  false,
+                        "transaction":  31
+                    },
+                    {
+                        "signature":  "f6bd1c0acc22cb2d9e47f7bd0dc9792cd0445bc093b5c025842d84db3031b285",
+                        "supported":  true,
+                        "byteDpi":  false,
+                        "transaction":  31
+                    }
+                ]
+}

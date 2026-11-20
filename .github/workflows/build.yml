@@ -47,7 +47,7 @@ jobs:
           test -n "$expected"
           printf '%s  %s\n' "$expected" "$RUNNER_TEMP/actionlint.tar.gz" | sha256sum --check
           tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP" actionlint
-          "$RUNNER_TEMP/actionlint" -shellcheck= -pyflakes= .github/workflows/build.yml
+          "$RUNNER_TEMP/actionlint" -shellcheck= -pyflakes= .github/workflows/*.yml
           bash -n tools/publish-release.sh
   windows:
     needs: version

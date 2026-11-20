@@ -1,0 +1,131 @@
+name: Check OpenRazer mouse updates
+on:
+  schedule:
+    - cron: '17 5 * * 1'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Reconvert even if the tracked mouse files are unchanged'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: sync-openrazer-mice
+  cancel-in-progress: false
+jobs:
+  convert:
+    if: github.repository == 'hdijkema/razer-mouse-lite'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    outputs:
+      changed: ${{ steps.sync.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v6
+        with:
+          repository: openrazer/openrazer
+          ref: master
+          path: build/upstream/openrazer
+          persist-credentials: false
+      - name: Check relevant upstream mouse and protocol files
+        id: probe
+        shell: pwsh
+        env:
+          FORCE: ${{ inputs.force }}
+        run: ./tools/sync-openrazer.ps1 -Upstream build/upstream/openrazer -CheckOnly -Force:($env:FORCE -eq 'true')
+      - uses: actions/checkout@v6
+        if: steps.probe.outputs.convert == 'true'
+        with:
+          repository: Ar4ikov/openrazer-win
+          ref: ${{ steps.probe.outputs.converter_ref }}
+          path: build/upstream/converter
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        if: steps.probe.outputs.convert == 'true'
+        with:
+          python-version: '3.13'
+      - name: Test importer against shifted recipe indices
+        if: steps.probe.outputs.convert == 'true'
+        shell: pwsh
+        run: ./tests/test-import-reference.ps1 -Reference build/upstream/converter
+      - name: Convert OpenRazer into a candidate database
+        if: steps.probe.outputs.convert == 'true'
+        id: sync
+        shell: pwsh
+        env:
+          FORCE: ${{ inputs.force }}
+        run: ./tools/sync-openrazer.ps1 -Upstream build/upstream/openrazer -Converter build/upstream/converter -Force:($env:FORCE -eq 'true')
+      - name: Build and test the candidate with the C++ engine
+        if: steps.sync.outputs.changed == 'true'
+        run: |
+          sudo apt-get -o Acquire::Retries=3 update
+          sudo apt-get -o Acquire::Retries=3 install -y --no-install-recommends cmake ninja-build g++ pkg-config qt6-base-dev qt6-qpa-plugins qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools libudev-dev fonts-dejavu-core
+          cmake -S . -B build/sync-test -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/sync-test --parallel 2
+          ctest --test-dir build/sync-test --output-on-failure
+      - name: Prepare only reviewed candidate paths
+        if: steps.sync.outputs.changed == 'true'
+        run: |
+          mkdir -p build/sync-candidate/data
+          cp data/mice.json data/openrazer-source.json build/sync-candidate/data/
+          cp build/sync-pr-body.md build/sync-candidate/pr-body.md
+      - uses: actions/upload-artifact@v6
+        if: steps.sync.outputs.changed == 'true'
+        with:
+          name: openrazer-candidate
+          path: |
+            build/sync-candidate/data/mice.json
+            build/sync-candidate/data/openrazer-source.json
+            build/sync-candidate/pr-body.md
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: openrazer-sync-diagnostics
+          path: |
+            build/openrazer-sync-*/mice.json
+            build/openrazer-sync-*/reference/openrazer_win/devices/data/*.json
+            build/sync-test/Testing/Temporary/LastTest.log
+          if-no-files-found: ignore
+          retention-days: 14
+  propose:
+    needs: convert
+    if: needs.convert.outputs.changed == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/download-artifact@v7
+        with:
+          name: openrazer-candidate
+          path: build/sync-candidate
+      - name: Copy validated definitions
+        run: cp build/sync-candidate/data/mice.json build/sync-candidate/data/openrazer-source.json data/
+      - uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # v8
+        id: pr
+        with:
+          branch: automation/openrazer-mice
+          base: main
+          add-paths: |
+            data/mice.json
+            data/openrazer-source.json
+          commit-message: 'Update mouse definitions from OpenRazer'
+          title: 'Update mouse definitions from OpenRazer'
+          body-path: build/sync-candidate/pr-body.md
+          draft: true
+      - name: Explicitly run platform builds for the candidate branch
+        if: steps.pr.outputs.pull-request-operation == 'created' || steps.pr.outputs.pull-request-operation == 'updated'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run build.yml --ref automation/openrazer-mice
