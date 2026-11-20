@@ -119,7 +119,7 @@ project: 100–8500 DPI, static lighting, brightness, and 125/500/1000 Hz pollin
 The Windows backend has been exercised with this mouse, including reading its
 current DPI. Automated packet tests also check its exact protocol messages.
 
-The embedded database describes **114 USB mouse models** derived from OpenRazer
+The bundled database describes **over 100 USB mouse models** derived from OpenRazer
 and openrazer-win. A database entry does **not** mean that every feature has been
 verified on that model. Bluetooth is not supported.
 
