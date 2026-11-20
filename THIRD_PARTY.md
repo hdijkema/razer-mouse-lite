@@ -34,3 +34,8 @@ local Razer Synapse installation (C:/ProgramData/Razer/Razer Synapse/Synapse.ico
 assets/razer-mouse-lite.png is the embedded 256x256 PNG copied from that icon for Linux desktop use.
 The icon and Razer/Synapse trademarks belong to Razer and are not covered by this
 project's GPL license. Razer Mouse Lite is an independent application.
+
+The user-supplied `assets/razer-badge.svg` contains the Razer logo. The app renders
+its background circle in the active profile's colour for the tray and window
+icons. The Razer logo remains Razer's trademark and is not covered by this
+project's GPL license.

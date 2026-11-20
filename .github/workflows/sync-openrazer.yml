@@ -62,7 +62,7 @@ jobs:
         if: steps.sync.outputs.changed == 'true'
         run: |
           sudo apt-get -o Acquire::Retries=3 update
-          sudo apt-get -o Acquire::Retries=3 install -y --no-install-recommends cmake ninja-build g++ pkg-config qt6-base-dev qt6-qpa-plugins qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools libudev-dev fonts-dejavu-core
+          sudo apt-get -o Acquire::Retries=3 install -y --no-install-recommends cmake ninja-build g++ pkg-config qt6-base-dev qt6-qpa-plugins qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools qt6-svg-dev libudev-dev fonts-dejavu-core
           cmake -S . -B build/sync-test -G Ninja -DCMAKE_BUILD_TYPE=Release
           cmake --build build/sync-test --parallel 2
           ctest --test-dir build/sync-test --output-on-failure

@@ -24,6 +24,7 @@ public:
     ~RazerMouseWindow() override;
     void reveal();
     static QIcon mouseIcon(const QColor &color);
+    static QIcon profileIcon(const QColor &color);
 protected:
     void closeEvent(QCloseEvent *event) override;
 private:

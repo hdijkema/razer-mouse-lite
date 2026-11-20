@@ -15,7 +15,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-find_package(Qt6 6.4 REQUIRED COMPONENTS Widgets Network Concurrent LinguistTools)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Widgets Network Concurrent LinguistTools Svg)
 
 add_subdirectory(src/core)
 add_subdirectory(src/platform)

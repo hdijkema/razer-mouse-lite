@@ -1,4 +1,4 @@
-﻿# Building Razer Mouse Lite
+# Building Razer Mouse Lite
 
 The repository root is the `razer-mouse-lite` folder. Open its `CMakeLists.txt`
 in Qt Creator, or open the folder in VS Code. The `openrazer-win` reference
@@ -7,7 +7,7 @@ checkout is not needed: the device database is already embedded in this project.
 ## Requirements
 
 - CMake 3.21 or later and a C++17 compiler.
-- Qt 6.4 or later: Widgets, Network, Concurrent, and LinguistTools.
+- Qt 6.4 or later: Widgets, Network, Concurrent, Svg, and LinguistTools.
 - Windows: Visual Studio 2022 C++ tools and Windows SDK, x64 Qt built for MSVC.
 - Linux: `pkg-config` and `libudev-dev`; optional `xinput` for X11 pointer settings.
 
@@ -57,7 +57,7 @@ Ubuntu 24.04, Debian 13, or a distribution providing Qt 6.4 or later:
 
 ```sh
 sudo apt install build-essential cmake ninja-build pkg-config libudev-dev file dpkg-dev \
-    qt6-base-dev qt6-qpa-plugins qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools
+    qt6-base-dev qt6-qpa-plugins qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools qt6-svg-dev
 # Optional, for X11 pointer settings:
 sudo apt install xinput
 cmake -S . -B build/linux -G Ninja -DCMAKE_BUILD_TYPE=Release

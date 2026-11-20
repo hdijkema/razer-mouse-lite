@@ -1,1 +1,1 @@
-<RCC><qresource prefix="/"><file>data/mice.json</file><file>data/messages.json</file><file>assets/razer-synapse.ico</file></qresource></RCC>
+<RCC><qresource prefix="/"><file>data/mice.json</file><file>data/messages.json</file><file>assets/razer-synapse.ico</file><file>assets/razer-badge.svg</file></qresource></RCC>

@@ -9,6 +9,8 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QFile>
+#include <QSvgRenderer>
 #include <QLineEdit>
 #include <QListWidget>
 #include <QMenu>
@@ -32,6 +34,29 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <memory>
+
+QIcon RazerMouseWindow::profileIcon(const QColor &color)
+{
+    static const QByteArray badge = [] {
+        QFile file(":/assets/razer-badge.svg");
+        return file.open(QIODevice::ReadOnly) ? file.readAll() : QByteArray{};
+    }();
+    auto svg = badge;
+    const auto background = color.isValid() ? color : QColor("#00ff00");
+    svg.replace("fill:#0f0", "fill:" + background.name().toLatin1());
+    QSvgRenderer renderer(svg);
+    if (!renderer.isValid()) return QIcon(":/assets/razer-synapse.ico");
+    QIcon icon;
+    for (const int size : {16, 20, 22, 24, 32, 40, 48, 64, 128, 256}) {
+        QPixmap image(size, size);
+        image.fill(Qt::transparent);
+        QPainter painter(&image);
+        renderer.render(&painter);
+        painter.end();
+        icon.addPixmap(image);
+    }
+    return icon;
+}
 
 QIcon RazerMouseWindow::mouseIcon(const QColor &color)
 {
@@ -59,7 +84,7 @@ RazerMouseWindow::RazerMouseWindow(QWidget *parent, bool preview)
     if (!store.load(&error)) readOnly = true;
     restorePending = !preview && !readOnly && store.restoreOnStart && !store.activeId.isEmpty();
     setWindowTitle("Razer Mouse Lite");
-    setWindowIcon(QIcon(":/assets/razer-synapse.ico"));
+    setWindowIcon(profileIcon(QColor()));
     resize(1000, 850);
     setMinimumSize(900, 700);
     buildUi();
@@ -510,15 +535,23 @@ void RazerMouseWindow::rebuildTray()
     if (!tray) return;
     trayMenu->clear();
     QString activeName = tr("No profile applied yet");
+    QColor activeColor;
     for (int i = 0; i < store.profiles.size(); ++i) {
         const auto &profile = store.profiles[i];
         auto action = trayMenu->addAction(mouseIcon(profile.color), profile.name + " · " + QString::number(profile.dpi) + " DPI");
         action->setCheckable(true); action->setChecked(store.activeId == profile.id);
         action->setEnabled(!readOnly);
-        if (store.activeId == profile.id) activeName = profile.name;
+        if (store.activeId == profile.id) {
+            activeName = profile.name;
+            activeColor = profile.color;
+        }
         connect(action, &QAction::triggered, this, [this, i] { profileList->setCurrentRow(i); activateProfile(i); });
     }
     activeLabel->setText(activeName);
+    const auto icon = profileIcon(activeColor);
+    tray->setIcon(icon);
+    setWindowIcon(icon);
+    QApplication::setWindowIcon(icon);
     tray->setToolTip(tr("Razer Mouse Lite · %1\nClick: next profile · Double-click: settings").arg(activeName));
     trayMenu->addSeparator();
     connect(trayMenu->addAction(tr("Open settings")), &QAction::triggered, this, &RazerMouseWindow::reveal);
