@@ -5,6 +5,7 @@
 #include "hiddescriptor.h"
 #include "desktopentry.h"
 #include "translations.h"
+#include "devicedatabase.h"
 #include <QJsonDocument>
 #include <QRegularExpression>
 #include <QSet>
@@ -88,6 +89,57 @@ int selfTest(const QString &catalogueDirectory)
     QTextStream output(stdout);
     try {
         checkTranslations(catalogueDirectory);
+        const auto bundledModels = DeviceDatabase::bundled();
+        const auto databaseBytes = QJsonDocument(bundledModels).toJson(QJsonDocument::Compact);
+        for (const auto &model : bundledModels) {
+            if (!DeviceDatabase::validate(QJsonDocument(QJsonArray{model}).toJson(QJsonDocument::Compact)))
+                throw std::runtime_error(("Invalid bundled device definition: " + model.toObject().value("name").toString()).toStdString());
+        }
+        check(DeviceDatabase::validate(databaseBytes), "Bundled device definitions fail validation");
+        check(!DeviceDatabase::validate("[]") && !DeviceDatabase::validate("{broken"), "Empty or malformed device definitions accepted");
+        check(!DeviceDatabase::validate(QByteArray(DeviceDatabase::maximumBytes + 1, ' ')), "Oversized device definitions accepted");
+        auto duplicateModels = bundledModels;
+        duplicateModels.append(bundledModels.first());
+        check(!DeviceDatabase::validate(QJsonDocument(duplicateModels).toJson()), "Duplicate USB product IDs accepted");
+        auto badModel = bundledModels.first().toObject();
+        badModel["dpiTx"] = 256;
+        check(!DeviceDatabase::validate(QJsonDocument(QJsonArray{badModel}).toJson()), "Out-of-range protocol byte accepted");
+        badModel = bundledModels.first().toObject();
+        badModel["newProtocol"] = true;
+        check(!DeviceDatabase::validate(QJsonDocument(QJsonArray{badModel}).toJson()), "Unknown model format accepted");
+        badModel = bundledModels.first().toObject();
+        const QJsonObject unknownStep{{"op", "build"}, {"fn", "unknown_protocol_function"}, {"args", QJsonArray{}}};
+        const QJsonObject badZone{{"name", "logo"}, {"color", QJsonArray{unknownStep}}, {"off", QJsonArray{}}, {"brightness", QJsonArray{}}};
+        badModel["zones"] = QJsonArray{badZone};
+        check(!DeviceDatabase::validate(QJsonDocument(QJsonArray{badModel}).toJson()), "Unknown lighting protocol accepted");
+        QTemporaryDir databaseDirectory;
+        check(databaseDirectory.isValid(), "Temporary device database directory");
+        const auto databasePath = databaseDirectory.filePath("definitions.json");
+        QString databaseError;
+        check(DeviceDatabase::install(databaseBytes, databasePath, &databaseError), "Atomic device database install failed");
+        QFile savedDatabase(databasePath);
+        check(savedDatabase.open(QIODevice::ReadOnly), "Saved device database missing");
+        const auto savedBytes = savedDatabase.readAll();
+        savedDatabase.close();
+        check(!DeviceDatabase::install("[broken", databasePath, &databaseError), "Invalid database replaced saved definitions");
+        check(savedDatabase.open(QIODevice::ReadOnly) && savedDatabase.readAll() == savedBytes, "Rejected update changed saved definitions");
+        savedDatabase.close();
+        check(DeviceDatabase::load(databasePath) && DeviceDatabase::models() == bundledModels, "Device database reload failed");
+        auto expandedModels = bundledModels;
+        auto syntheticModel = bundledModels.first().toObject();
+        syntheticModel["pid"] = 65534;
+        syntheticModel["name"] = "Synthetic database test device";
+        expandedModels.append(syntheticModel);
+        check(DeviceDatabase::install(QJsonDocument(expandedModels).toJson(QJsonDocument::Compact), databasePath, &databaseError)
+            && DeviceDatabase::models() == expandedModels, "Validated new device did not become available");
+        check(DeviceDatabase::load(databasePath) && DeviceDatabase::models() == expandedModels, "Updated devices were not retained on reload");
+        check(DeviceDatabase::install(databaseBytes, databasePath, &databaseError), "Could not restore bundled test definitions");
+        check(!DeviceDatabase::install(databaseBytes, databaseDirectory.path(), &databaseError), "Database install to directory succeeded");
+        auto wrongVersion = QJsonDocument::fromJson(savedBytes).object();
+        wrongVersion["appVersion"] = "incompatible-version";
+        check(savedDatabase.open(QIODevice::WriteOnly | QIODevice::Truncate), "Cannot write incompatible cache fixture");
+        savedDatabase.write(QJsonDocument(wrongVersion).toJson()); savedDatabase.close();
+        check(!DeviceDatabase::load(databasePath), "Cache from another app version accepted");
         check(HidDescriptor::featureReportLength(QByteArray::fromHex("7508955ab102")) == 91, "Unnumbered HID feature report");
         check(HidDescriptor::featureReportLength(QByteArray::fromHex("7508952db102b102")) == 91, "Accumulated HID feature fields");
         check(HidDescriptor::featureReportLength(QByteArray::fromHex("7508955aa485019501b102b4b102")) == 91, "HID global push/pop");

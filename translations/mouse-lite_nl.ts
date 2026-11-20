@@ -455,5 +455,53 @@ Klik: volgend profiel · Dubbelklik: instellingen</translation>
             <source>Connect your Razer mouse using USB. You can save profiles in advance.</source>
             <translation>Sluit je Razer-muis via USB aan. Profielen kun je alvast opslaan.</translation>
         </message>
+        <message>
+            <source>About</source>
+            <translation>Over</translation>
+        </message>
+        <message>
+            <source>About Razer Mouse Lite</source>
+            <translation>Over Razer Mouse Lite</translation>
+        </message>
+        <message>
+            <source>Huge thanks to the OpenRazer and openrazer-win communities for reverse-engineering the device protocols and sharing their work. This app builds on their efforts.</source>
+            <translation>Veel dank aan de OpenRazer- en openrazer-win-gemeenschappen voor het ontrafelen van de apparaatprotocollen en het delen van hun werk. Deze app bouwt voort op hun inzet.</translation>
+        </message>
+        <message>
+            <source>Want to help support a new device? OpenRazer explains how to capture and analyse USB traffic.</source>
+            <translation>Wil je helpen een nieuw apparaat te ondersteunen? OpenRazer legt uit hoe je USB-verkeer vastlegt en analyseert.</translation>
+        </message>
+        <message>
+            <source>USB protocol reverse-engineering guide</source>
+            <translation>Handleiding voor reverse engineering van het USB-protocol</translation>
+        </message>
+        <message>
+            <source>Update device definitions</source>
+            <translation>Apparaatdefinities bijwerken</translation>
+        </message>
+        <message>
+            <source>Checking device definitions…</source>
+            <translation>Apparaatdefinities controleren…</translation>
+        </message>
+        <message>
+            <source>Could not update device definitions. Check your connection and try again.</source>
+            <translation>Apparaatdefinities bijwerken mislukt. Controleer je verbinding en probeer opnieuw.</translation>
+        </message>
+        <message>
+            <source>These device definitions are incompatible or damaged. The current definitions have been kept.</source>
+            <translation>Deze apparaatdefinities zijn niet compatibel of beschadigd. De huidige definities zijn behouden.</translation>
+        </message>
+        <message>
+            <source>Device definitions are up to date.</source>
+            <translation>De apparaatdefinities zijn bijgewerkt.</translation>
+        </message>
+        <message>
+            <source>Could not save device definitions: %1</source>
+            <translation>Apparaatdefinities opslaan mislukt: %1</translation>
+        </message>
+        <message>
+            <source>Device definitions updated. No mouse settings were changed.</source>
+            <translation>Apparaatdefinities vernieuwd. Er zijn geen muisinstellingen gewijzigd.</translation>
+        </message>
     </context>
 </TS>

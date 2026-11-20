@@ -1,6 +1,7 @@
 ﻿#include "razermousewindow.h"
 #include "selftest.h"
 #include "translations.h"
+#include "devicedatabase.h"
 #include <QApplication>
 #include <QDir>
 #include <QFile>
@@ -41,6 +42,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     const bool smoke = arguments.contains("--smoke-test");
+    if (!smoke) DeviceDatabase::load(DeviceDatabase::cachePath());
     app.setQuitOnLastWindowClosed(false);
     const QString directory = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
     if (!smoke && !QDir().mkpath(directory)) return 1;

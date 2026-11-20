@@ -455,5 +455,53 @@ Klick: nächstes Profil · Doppelklick: Einstellungen</translation>
             <source>Connect your Razer mouse using USB. You can save profiles in advance.</source>
             <translation>Schließen Sie Ihre Razer-Maus über USB an. Profile können Sie bereits speichern.</translation>
         </message>
+        <message>
+            <source>About</source>
+            <translation>Über</translation>
+        </message>
+        <message>
+            <source>About Razer Mouse Lite</source>
+            <translation>Über Razer Mouse Lite</translation>
+        </message>
+        <message>
+            <source>Huge thanks to the OpenRazer and openrazer-win communities for reverse-engineering the device protocols and sharing their work. This app builds on their efforts.</source>
+            <translation>Ein großes Dankeschön an die OpenRazer- und openrazer-win-Communitys für die Entschlüsselung der Geräteprotokolle und das Teilen ihrer Arbeit. Diese App baut auf ihren Leistungen auf.</translation>
+        </message>
+        <message>
+            <source>Want to help support a new device? OpenRazer explains how to capture and analyse USB traffic.</source>
+            <translation>Möchtest du bei der Unterstützung eines neuen Geräts helfen? OpenRazer erklärt, wie du USB-Datenverkehr aufzeichnest und analysierst.</translation>
+        </message>
+        <message>
+            <source>USB protocol reverse-engineering guide</source>
+            <translation>Anleitung zum Reverse Engineering des USB-Protokolls</translation>
+        </message>
+        <message>
+            <source>Update device definitions</source>
+            <translation>Gerätedefinitionen aktualisieren</translation>
+        </message>
+        <message>
+            <source>Checking device definitions…</source>
+            <translation>Gerätedefinitionen werden geprüft…</translation>
+        </message>
+        <message>
+            <source>Could not update device definitions. Check your connection and try again.</source>
+            <translation>Gerätedefinitionen konnten nicht aktualisiert werden. Prüfe deine Verbindung und versuche es erneut.</translation>
+        </message>
+        <message>
+            <source>These device definitions are incompatible or damaged. The current definitions have been kept.</source>
+            <translation>Diese Gerätedefinitionen sind inkompatibel oder beschädigt. Die bisherigen Definitionen wurden beibehalten.</translation>
+        </message>
+        <message>
+            <source>Device definitions are up to date.</source>
+            <translation>Die Gerätedefinitionen sind aktuell.</translation>
+        </message>
+        <message>
+            <source>Could not save device definitions: %1</source>
+            <translation>Gerätedefinitionen konnten nicht gespeichert werden: %1</translation>
+        </message>
+        <message>
+            <source>Device definitions updated. No mouse settings were changed.</source>
+            <translation>Gerätedefinitionen aktualisiert. Es wurden keine Mauseinstellungen geändert.</translation>
+        </message>
     </context>
 </TS>

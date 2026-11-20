@@ -455,5 +455,53 @@ Click: next profile · Double-click: settings</translation>
             <source>Connect your Razer mouse using USB. You can save profiles in advance.</source>
             <translation>Connect your Razer mouse using USB. You can save profiles in advance.</translation>
         </message>
+        <message>
+            <source>About</source>
+            <translation>About</translation>
+        </message>
+        <message>
+            <source>About Razer Mouse Lite</source>
+            <translation>About Razer Mouse Lite</translation>
+        </message>
+        <message>
+            <source>Huge thanks to the OpenRazer and openrazer-win communities for reverse-engineering the device protocols and sharing their work. This app builds on their efforts.</source>
+            <translation>Huge thanks to the OpenRazer and openrazer-win communities for reverse-engineering the device protocols and sharing their work. This app builds on their efforts.</translation>
+        </message>
+        <message>
+            <source>Want to help support a new device? OpenRazer explains how to capture and analyse USB traffic.</source>
+            <translation>Want to help support a new device? OpenRazer explains how to capture and analyse USB traffic.</translation>
+        </message>
+        <message>
+            <source>USB protocol reverse-engineering guide</source>
+            <translation>USB protocol reverse-engineering guide</translation>
+        </message>
+        <message>
+            <source>Update device definitions</source>
+            <translation>Update device definitions</translation>
+        </message>
+        <message>
+            <source>Checking device definitions…</source>
+            <translation>Checking device definitions…</translation>
+        </message>
+        <message>
+            <source>Could not update device definitions. Check your connection and try again.</source>
+            <translation>Could not update device definitions. Check your connection and try again.</translation>
+        </message>
+        <message>
+            <source>These device definitions are incompatible or damaged. The current definitions have been kept.</source>
+            <translation>These device definitions are incompatible or damaged. The current definitions have been kept.</translation>
+        </message>
+        <message>
+            <source>Device definitions are up to date.</source>
+            <translation>Device definitions are up to date.</translation>
+        </message>
+        <message>
+            <source>Could not save device definitions: %1</source>
+            <translation>Could not save device definitions: %1</translation>
+        </message>
+        <message>
+            <source>Device definitions updated. No mouse settings were changed.</source>
+            <translation>Device definitions updated. No mouse settings were changed.</translation>
+        </message>
     </context>
 </TS>

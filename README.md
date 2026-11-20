@@ -22,7 +22,8 @@ small job. Razer Mouse Lite keeps that job small:
 - A tray menu for switching profiles.
 - No account, cloud sync, advertising, promotional pop-ups, or telemetry.
 - No webview, bundled browser, background service, or Python runtime.
-- No application update checker or other application-initiated internet requests.
+- No background update checks. Device definitions are downloaded only when you
+  click **Update device definitions**.
 - Start at login only if you enable it. Restore your last profile only if you enable that too.
 
 This is the kind of frustration people describe in Reddit discussions about
@@ -122,6 +123,18 @@ The embedded database describes **114 USB mouse models** derived from OpenRazer
 and openrazer-win. A database entry does **not** mean that every feature has been
 verified on that model. Bluetooth is not supported.
 
+**Update device definitions** checks this project's published, converted mouse
+database on GitHub. Compatible changes are stored locally and take effect without
+reinstalling the app. Downloads are checked before installation; an invalid,
+unsupported or failed download leaves the current definitions in place. Updating
+definitions does not apply a profile or send settings to the mouse.
+
+OpenRazer is the original source of the device knowledge. Its definitions live in
+C driver code and Python device classes, rather than a standalone `mice.json`.
+Our database is converted from openrazer-win's OpenRazer-derived data, not a file
+distributed by OpenRazer itself. New protocol behaviour still needs an app update.
+The app works offline; this optional button contacts GitHub only when requested.
+
 If a command fails, the app reports the error rather than marking the profile as
 successfully applied. Earlier hardware commands may already have taken effect;
 there is no automatic hardware rollback.
@@ -167,4 +180,8 @@ icon is not covered by the project's GPL license.
 The code is **GPL-2.0-or-later**. Protocol and device information are adapted from
 [OpenRazer](https://github.com/openrazer/openrazer) and
 [openrazer-win](https://github.com/Ar4ikov/openrazer-win).
+Huge thanks to both communities for investigating device protocols and sharing
+their work. The **About** dialog links to their projects and OpenRazer's
+[USB reverse-engineering guide](https://github.com/openrazer/openrazer/wiki/Reverse-Engineering-USB-Protocol)
+for people who want to help add device support.
 See [LICENSE](LICENSE) and [THIRD_PARTY.md](THIRD_PARTY.md).

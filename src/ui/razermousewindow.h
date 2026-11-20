@@ -14,6 +14,7 @@ class QSlider;
 class QSpinBox;
 class QTimer;
 class QMenu;
+class QNetworkAccessManager;
 
 class RazerMouseWindow : public QMainWindow
 {
@@ -27,6 +28,8 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 private:
     void buildUi();
+    void showAbout();
+    void updateDefinitions();
     void refreshDevices();
     void rebuildProfiles();
     void rebuildTray();
@@ -64,6 +67,8 @@ private:
     QWidget *editor = nullptr;
     QPushButton *applyButton = nullptr;
     QPushButton *refreshButton = nullptr;
+    QPushButton *updateButton = nullptr;
+    QNetworkAccessManager *downloads = nullptr;
     QPushButton *addButton = nullptr;
     QPushButton *deleteButton = nullptr;
     QColor editedColor;
@@ -71,6 +76,8 @@ private:
     bool readOnly = false;
     bool preview = false;
     bool restorePending = false;
+    bool suppressRestoreOnce = false;
+    bool restoreAfterScan = true;
     QString applyingId;
 };
 

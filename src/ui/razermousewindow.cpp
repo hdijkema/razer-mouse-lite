@@ -26,6 +26,12 @@
 #include <QtConcurrent>
 #include "platform.h"
 #include "translations.h"
+#include "devicedatabase.h"
+#include <QJsonDocument>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <memory>
 
 QIcon RazerMouseWindow::mouseIcon(const QColor &color)
 {
@@ -93,7 +99,7 @@ RazerMouseWindow::RazerMouseWindow(QWidget *parent, bool preview)
         if (selected >= 0) store.devicePath = devices[selected].path;
         updateCapabilities();
         const bool reconnect = !this->preview && store.restoreOnStart && !wasConnected && selected >= 0 && !store.activeId.isEmpty();
-        if ((restorePending || reconnect) && selected >= 0) {
+        if (restoreAfterScan && (restorePending || reconnect) && selected >= 0) {
             restorePending = false;
             for (int i = 0; i < store.profiles.size(); ++i)
                 if (store.profiles[i].id == store.activeId) { activateProfile(i); break; }
@@ -162,6 +168,9 @@ void RazerMouseWindow::buildUi()
     activeLabel = new QLabel(tr("No profile applied yet"));
     activeLabel->setObjectName("activeBadge");
     header->addWidget(activeLabel);
+    auto aboutButton = new QPushButton(tr("About"));
+    header->addWidget(aboutButton);
+    connect(aboutButton, &QPushButton::clicked, this, &RazerMouseWindow::showAbout);
     root->addLayout(header);
     auto subtitle = new QLabel(tr("Your mouse. Your settings. Done."));
     subtitle->setObjectName("muted");
@@ -172,6 +181,9 @@ void RazerMouseWindow::buildUi()
     deviceRow->addWidget(deviceBox, 1);
     refreshButton = new QPushButton(tr("Refresh"));
     deviceRow->addWidget(refreshButton);
+    updateButton = new QPushButton(tr("Update device definitions"));
+    deviceRow->addWidget(updateButton);
+    connect(updateButton, &QPushButton::clicked, this, &RazerMouseWindow::updateDefinitions);
     root->addLayout(deviceRow);
     deviceLabel = new QLabel(tr("Looking for USB mice…"));
     deviceLabel->setObjectName("muted");
@@ -383,6 +395,66 @@ void RazerMouseWindow::loadEditor(int index)
     updateCapabilities();
 }
 
+void RazerMouseWindow::showAbout()
+{
+    QMessageBox::about(this, tr("About Razer Mouse Lite"),
+        "<h3>Razer Mouse Lite " + QApplication::applicationVersion().toHtmlEscaped() + "</h3>"
+        "<p>" + tr("Huge thanks to the OpenRazer and openrazer-win communities for reverse-engineering the device protocols and sharing their work. This app builds on their efforts.").toHtmlEscaped() + "</p>"
+        "<p>" + tr("Want to help support a new device? OpenRazer explains how to capture and analyse USB traffic.").toHtmlEscaped() + "</p>"
+        "<p><a href=\"https://openrazer.github.io/\">OpenRazer</a> &middot; "
+        "<a href=\"https://github.com/Ar4ikov/openrazer-win\">openrazer-win</a><br>"
+        "<a href=\"https://github.com/openrazer/openrazer/wiki/Reverse-Engineering-USB-Protocol\">"
+        + tr("USB protocol reverse-engineering guide").toHtmlEscaped() + "</a></p>");
+}
+
+void RazerMouseWindow::updateDefinitions()
+{
+    if (preview || !updateButton->isEnabled()) return;
+    if (!downloads) downloads = new QNetworkAccessManager(this);
+    updateButton->setEnabled(false);
+    statusLabel->setText(tr("Checking device definitions…"));
+    // OpenRazer's C/Python definitions need conversion. Only fetch our reviewed,
+    // compatible data; never execute downloaded code or guess new USB commands.
+    QNetworkRequest request(QUrl("https://raw.githubusercontent.com/hdijkema/razer-mouse-lite/main/data/mice.json"));
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::ManualRedirectPolicy);
+    request.setTransferTimeout(20000);
+    auto reply = downloads->get(request);
+    QTimer::singleShot(20000, reply, [reply] { if (!reply->isFinished()) reply->abort(); });
+    reply->setReadBufferSize(65536);
+    auto payload = std::make_shared<QByteArray>();
+    connect(reply, &QNetworkReply::readyRead, this, [reply, payload] {
+        payload->append(reply->read(DeviceDatabase::maximumBytes + 1 - payload->size()));
+        if (payload->size() > DeviceDatabase::maximumBytes) reply->abort();
+    });
+    connect(reply, &QNetworkReply::finished, this, [this, reply, payload] {
+        updateButton->setEnabled(true);
+        reply->deleteLater();
+        if (reply->error() != QNetworkReply::NoError
+            || reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200) {
+            statusLabel->setText(tr("Could not update device definitions. Check your connection and try again."));
+            return;
+        }
+        payload->append(reply->read(DeviceDatabase::maximumBytes + 1 - payload->size()));
+        QJsonArray candidate;
+        if (!DeviceDatabase::validate(*payload, &candidate)) {
+            statusLabel->setText(tr("These device definitions are incompatible or damaged. The current definitions have been kept."));
+            return;
+        }
+        if (candidate == DeviceDatabase::models()) {
+            statusLabel->setText(tr("Device definitions are up to date."));
+            return;
+        }
+        QString error;
+        if (!DeviceDatabase::install(*payload, DeviceDatabase::cachePath(), &error)) {
+            statusLabel->setText(tr("Could not save device definitions: %1").arg(error));
+            return;
+        }
+        statusLabel->setText(tr("Device definitions updated. No mouse settings were changed."));
+        suppressRestoreOnce = true;
+        refreshDevices();
+    });
+}
+
 void RazerMouseWindow::updateColorButton()
 {
     colorButton->setText(editedColor.name().toUpper());
@@ -450,12 +522,15 @@ void RazerMouseWindow::rebuildTray()
     tray->setToolTip(tr("Razer Mouse Lite · %1\nClick: next profile · Double-click: settings").arg(activeName));
     trayMenu->addSeparator();
     connect(trayMenu->addAction(tr("Open settings")), &QAction::triggered, this, &RazerMouseWindow::reveal);
+    connect(trayMenu->addAction(tr("About")), &QAction::triggered, this, &RazerMouseWindow::showAbout);
     connect(trayMenu->addAction(tr("Quit")), &QAction::triggered, qApp, &QApplication::quit);
 }
 
 void RazerMouseWindow::refreshDevices()
 {
     if (scan.isRunning() || application.isRunning()) { deviceTimer->start(800); return; }
+    restoreAfterScan = !suppressRestoreOnce;
+    suppressRestoreOnce = false;
     refreshButton->setEnabled(false);
     applyButton->setEnabled(false);
     scan.setFuture(QtConcurrent::run(&MouseBackend::enumerate));

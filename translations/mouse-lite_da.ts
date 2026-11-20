@@ -455,5 +455,53 @@ Klik: næste profil · Dobbeltklik: indstillinger</translation>
             <source>Connect your Razer mouse using USB. You can save profiles in advance.</source>
             <translation>Tilslut din Razer-mus via USB. Du kan gemme profiler på forhånd.</translation>
         </message>
+        <message>
+            <source>About</source>
+            <translation>Om</translation>
+        </message>
+        <message>
+            <source>About Razer Mouse Lite</source>
+            <translation>Om Razer Mouse Lite</translation>
+        </message>
+        <message>
+            <source>Huge thanks to the OpenRazer and openrazer-win communities for reverse-engineering the device protocols and sharing their work. This app builds on their efforts.</source>
+            <translation>En stor tak til OpenRazer- og openrazer-win-fællesskaberne for at afdække enhedsprotokollerne og dele deres arbejde. Denne app bygger på deres indsats.</translation>
+        </message>
+        <message>
+            <source>Want to help support a new device? OpenRazer explains how to capture and analyse USB traffic.</source>
+            <translation>Vil du hjælpe med at understøtte en ny enhed? OpenRazer forklarer, hvordan du optager og analyserer USB-trafik.</translation>
+        </message>
+        <message>
+            <source>USB protocol reverse-engineering guide</source>
+            <translation>Vejledning i reverse engineering af USB-protokollen</translation>
+        </message>
+        <message>
+            <source>Update device definitions</source>
+            <translation>Opdater enhedsdefinitioner</translation>
+        </message>
+        <message>
+            <source>Checking device definitions…</source>
+            <translation>Søger efter enhedsdefinitioner…</translation>
+        </message>
+        <message>
+            <source>Could not update device definitions. Check your connection and try again.</source>
+            <translation>Enhedsdefinitionerne kunne ikke opdateres. Kontrollér forbindelsen, og prøv igen.</translation>
+        </message>
+        <message>
+            <source>These device definitions are incompatible or damaged. The current definitions have been kept.</source>
+            <translation>Disse enhedsdefinitioner er inkompatible eller beskadigede. De nuværende definitioner er bevaret.</translation>
+        </message>
+        <message>
+            <source>Device definitions are up to date.</source>
+            <translation>Enhedsdefinitionerne er opdaterede.</translation>
+        </message>
+        <message>
+            <source>Could not save device definitions: %1</source>
+            <translation>Enhedsdefinitionerne kunne ikke gemmes: %1</translation>
+        </message>
+        <message>
+            <source>Device definitions updated. No mouse settings were changed.</source>
+            <translation>Enhedsdefinitionerne er opdateret. Ingen museindstillinger blev ændret.</translation>
+        </message>
     </context>
 </TS>

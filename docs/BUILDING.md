@@ -151,8 +151,11 @@ The default version is declared in `project(... VERSION ...)` in `CMakeLists.txt
 A requested version must match a selected tag. Existing release assets are not
 overwritten, and an existing tag must point at the checked-out commit.
 
-GitHub runners download their build dependencies. The installed application does
-not need internet access. Workflow logs and screenshots are uploaded separately
+GitHub runners download their build dependencies. The installed application
+does not need internet access for mouse settings. Its optional device-definition
+update button fetches this repository's `main/data/mice.json` over HTTPS from
+`raw.githubusercontent.com`; no check runs at startup or in the background.
+Workflow logs and screenshots are uploaded separately
 from distributable packages.
 
 ## Source layout
@@ -171,3 +174,21 @@ adding UI text, update every TS catalogue with Qt Linguist/lupdate and refresh
 `data/messages.json`. Tests reject unfinished translations, mismatched source
 entries, and lost placeholders. Existing profile files using `windowsSettings`
 are migrated when read to the portable `pointerSettings` field.
+
+## Device definition updates
+
+`tools/import-reference.ps1` converts the locally supplied openrazer-win device
+and recipe data into our compact `data/mice.json`. OpenRazer's original definitions
+are C driver code and Python device classes, not this JSON format. Review changes
+to the importer when updating the reference: recipe indices and protocol behaviour
+can change. Run the complete tests before publishing database changes to `main`.
+The C++ validator rejects protocol functions it does not implement, malformed
+recipes, duplicate product IDs, invalid ranges and downloads larger than 2 MiB.
+
+The app uses Qt Network asynchronously, with a 20-second deadline, HTTPS
+certificate verification and no redirects. A validated download is saved using
+`QSaveFile` as `device-definitions.json` beside the profile data. The cache records
+the app version; a different app version or invalid cache falls back to the bundled
+definitions. Reinstalling or upgrading the app therefore cannot accidentally use
+definitions cached for a different engine version. Tests use temporary directories
+and the bundled database rather than a user's saved definitions.

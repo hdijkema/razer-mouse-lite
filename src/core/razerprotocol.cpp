@@ -3,14 +3,10 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <stdexcept>
+#include "devicedatabase.h"
 QJsonArray RazerProtocol::models()
 {
-    static const QJsonArray database = [] {
-        QFile file(":/data/mice.json");
-        if (!file.open(QIODevice::ReadOnly)) return QJsonArray{};
-        return QJsonDocument::fromJson(file.readAll()).array();
-    }();
-    return database;
+    return DeviceDatabase::models();
 }
 
 QByteArray RazerProtocol::report(int commandClass, int command, int size, int transaction)
