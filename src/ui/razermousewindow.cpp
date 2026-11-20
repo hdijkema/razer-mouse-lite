@@ -42,7 +42,11 @@ QIcon RazerMouseWindow::profileIcon(const QColor &color)
         return file.open(QIODevice::ReadOnly) ? file.readAll() : QByteArray{};
     }();
     auto svg = badge;
-    const auto background = color.isValid() ? color : QColor("#00ff00");
+    auto background = color.isValid() ? color : QColor("#00ff00");
+    // Stronger tray colours are easier to distinguish at small sizes. Preserve
+    // the profile hue and brightness, and leave neutral greys unchanged.
+    if (background.hsvSaturation() > 0)
+        background.setHsv(background.hsvHue(), qMax(210, background.hsvSaturation()), background.value());
     svg.replace("fill:#0f0", "fill:" + background.name().toLatin1());
     QSvgRenderer renderer(svg);
     if (!renderer.isValid()) return QIcon(":/assets/razer-synapse.ico");
