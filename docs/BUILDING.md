@@ -56,7 +56,7 @@ current-user mode and do not install the app into Program Files.
 Ubuntu 24.04, Debian 13, or a distribution providing Qt 6.4 or later:
 
 ```sh
-sudo apt install build-essential cmake ninja-build pkg-config libudev-dev \
+sudo apt install build-essential cmake ninja-build pkg-config libudev-dev file dpkg-dev \
     qt6-base-dev qt6-qpa-plugins qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools
 # Optional, for X11 pointer settings:
 sudo apt install xinput
