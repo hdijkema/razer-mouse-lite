@@ -134,8 +134,67 @@ jobs:
             build/ci/preview-*.png
             build/ci/Testing/Temporary/LastTest.log
           if-no-files-found: ignore
+  debian13:
+    name: Debian 13 amd64
+    needs: version
+    runs-on: ubuntu-24.04
+    container: debian:13
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      RELEASE_VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - name: Install Debian build dependencies
+        run: |
+          apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+          apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends ca-certificates git cmake ninja-build g++ qt6-base-dev qt6-qpa-plugins qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools libudev-dev fonts-dejavu-core dpkg-dev
+          . /etc/os-release
+          test "$ID:$VERSION_ID" = debian:13
+          test "$(dpkg --print-architecture)" = amd64
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Configure and build in Debian 13
+        run: |
+          cmake -S . -B build/debian13 -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DMOUSE_LITE_VERSION="$RELEASE_VERSION"
+          cmake --build build/debian13 --parallel 2
+      - name: Check translation sources and run tests
+        run: |
+          /usr/lib/qt6/bin/lupdate src -no-obsolete -ts translations/*.ts
+          ctest --test-dir build/debian13 --output-on-failure
+      - name: Package and test installed DEB
+        run: |
+          mkdir -p release
+          cpack --config build/debian13/CPackConfig.cmake -G DEB -B release -D "CPACK_PACKAGE_FILE_NAME=razer-mouse-lite-$RELEASE_VERSION-debian13-amd64"
+          package="release/razer-mouse-lite-$RELEASE_VERSION-debian13-amd64.deb"
+          test "$(dpkg-deb -f "$package" Version)" = "$RELEASE_VERSION"
+          test "$(dpkg-deb -f "$package" Architecture)" = amd64
+          dpkg-deb -f "$package" Depends
+          apt-get install -y "./$package"
+          QT_QPA_PLATFORM=offscreen /usr/bin/razer-mouse --self-test --language en
+          QT_QPA_PLATFORM=offscreen /usr/bin/razer-mouse --smoke-test "$GITHUB_WORKSPACE/build/debian13/installed.png" --language en
+      - name: Upload Debian 13 package
+        uses: actions/upload-artifact@v6
+        with:
+          name: razer-mouse-lite-debian13-amd64
+          path: release/*-debian13-amd64.deb
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload Debian 13 test reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: debian13-test-output
+          path: |
+            build/debian13/preview-*.png
+            build/debian13/installed.png
+            build/debian13/Testing/Temporary/LastTest.log
+          if-no-files-found: ignore
   release:
-    needs: [version, windows, linux]
+    needs: [version, windows, linux, debian13]
     if: needs.version.outputs.publish == 'true'
     runs-on: ubuntu-24.04
     permissions:

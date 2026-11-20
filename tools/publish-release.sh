@@ -11,6 +11,7 @@ assets=(
     "$package_dir/razer-mouse-lite-$version-windows-x64.zip"
     "$package_dir/razer-mouse-lite-$version-windows-x64-setup.exe"
     "$package_dir/razer-mouse-lite-$version-linux-x86_64.deb"
+    "$package_dir/razer-mouse-lite-$version-debian13-amd64.deb"
 )
 for asset in "${assets[@]}"; do
     if [[ ! -s $asset ]]; then echo "Missing release asset: $asset" >&2; exit 1; fi

@@ -53,7 +53,7 @@ current-user mode and do not install the app into Program Files.
 
 ## Linux
 
-Ubuntu 24.04, or a distribution providing Qt 6.4 or later:
+Ubuntu 24.04, Debian 13, or a distribution providing Qt 6.4 or later:
 
 ```sh
 sudo apt install build-essential cmake ninja-build pkg-config libudev-dev \
@@ -99,6 +99,18 @@ A package built on Ubuntu 24.04 is not a promise of compatibility with older
 Ubuntu or Debian releases. Other operating systems are rejected by CMake until a
 platform implementation exists.
 
+To reproduce the Debian 13 CI package, run the build inside Debian 13 (or the
+official `debian:13` container) and give CPack a distribution-specific filename:
+
+```sh
+cpack --config build/linux/CPackConfig.cmake -G DEB -B release \
+    -D CPACK_PACKAGE_FILE_NAME=razer-mouse-lite-0.3.0-debian13-amd64
+sudo apt install ./release/razer-mouse-lite-0.3.0-debian13-amd64.deb
+```
+
+Use the version you configured when building. Renaming an Ubuntu package does
+not turn it into a Debian build: dependencies must be generated in Debian 13.
+
 ## Tests and diagnostics
 
 ```sh
@@ -124,7 +136,8 @@ These commands do not apply mouse or desktop pointer settings, or enable autosta
 | version | Validated numeric version and release intent; version resolver tests |
 | windows | Release build, CTest, portable startup test, installer lifecycle test; ZIP and setup EXE artifacts |
 | linux | Release build, CTest, translation checks; Ubuntu 24.04 x86-64 DEB artifact |
-| release | Attaches all three packages to a GitHub Release after both builds pass |
+| debian13 | Native Debian 13 container build, CTest, DEB installation and installed-app checks; amd64 DEB artifact |
+| release | Attaches all four packages to a GitHub Release after all builds pass |
 
 Branch pushes and pull requests only build and test. To publish:
 

@@ -88,9 +88,18 @@ enabling autostart. After moving it, switch autostart off and on to update its p
 
 ### Linux
 
-The workflow produces a **DEB built for Ubuntu 24.04 x86-64**. Other distributions
-can build from source. Linux support uses `libudev` and `hidraw`; physical Linux
-mouse testing is still needed in addition to CI.
+The workflow produces separate packages for **Ubuntu 24.04 x86-64** and
+**Debian 13 (Trixie) amd64**. Choose the package matching your distribution:
+
+- Ubuntu: `razer-mouse-lite-<version>-linux-x86_64.deb`.
+- Debian 13: `razer-mouse-lite-<version>-debian13-amd64.deb`.
+
+The Debian package is built and tested inside a Debian 13 container, including
+installation and an installed-app startup check. Install your downloaded package
+with `sudo apt install ./razer-mouse-lite-<version>-debian13-amd64.deb`.
+
+Other distributions can build from source. Linux support uses `libudev` and
+`hidraw`; physical Linux mouse testing is still needed in addition to CI.
 
 The supplied udev rule grants the active local desktop session access to known
 Razer mouse models. See [Linux setup](docs/BUILDING.md#linux) for installation.
@@ -144,9 +153,9 @@ and is not silently overwritten. The installer and uninstaller preserve profiles
 See [BUILDING.md](docs/BUILDING.md) for Windows and Linux dependencies, local
 builds, Inno Setup packaging, testing, and GitHub Actions.
 
-Every push and pull request builds both platforms and runs the tests. A numeric
+Every push and pull request builds Windows, Ubuntu, and Debian 13 and runs the tests. A numeric
 tag such as `v0.3.0`, or a manual workflow run with a version, publishes a GitHub
-Release only after both platform jobs succeed. An ordinary branch push does not
+Release only after all platform jobs succeed. An ordinary branch push does not
 publish a release.
 
 ## Credits and license
