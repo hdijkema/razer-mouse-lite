@@ -1,16 +1,12 @@
 #pragma once
-#include <QByteArray>
-#include <QColor>
-#include <QJsonArray>
-#include <QJsonObject>
-
+#include "common.h"
 class RazerProtocol
 {
 public:
-    static QJsonArray models();
-    static QList<QByteArray> lightingReports(const QJsonArray &steps, const QColor &color, int brightness);
-    static QByteArray dpiReport(const QJsonObject &model, int dpi);
-    static QByteArray report(int commandClass, int command, int size, int transaction = 0);
-    static void checksum(QByteArray &report);
-    static bool validResponse(const QByteArray &request, const QByteArray &response);
+    static Json models();
+    static std::vector<Bytes> lightingReports(const Json& steps, const Color& color, int brightness);
+    static Bytes dpiReport(const Json& model, int dpi);
+    static Bytes report(int commandClass, int command, int size, int transaction = 0);
+    static void checksum(Bytes& report);
+    static bool validResponse(const Bytes& request, const Bytes& response);
 };

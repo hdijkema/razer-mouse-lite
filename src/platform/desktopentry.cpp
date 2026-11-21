@@ -1,10 +1,19 @@
 #include "desktopentry.h"
-
-QByteArray desktopAutostartEntry(const QString &executable)
+std::string desktopAutostartEntry(const std::string& executable)
 {
-    // First quote for Exec, then escape for the Desktop Entry string value.
-    QString escaped = executable;
-    escaped.replace("\\", "\\\\").replace("\"", "\\\"").replace("`", "\\`").replace("$", "\\$").replace("%", "%%");
-    escaped.replace("\\", "\\\\").replace('\n', "\\n").replace('\r', "\\r").replace('\t', "\\t");
-    return QString("[Desktop Entry]\nType=Application\nName=Razer Mouse Lite\nExec=\"%1\" --tray\nTerminal=false\nHidden=false\n").arg(escaped).toUtf8();
+    std::string quoted;
+    for (char c : executable) {
+        if (c == '%' ) quoted += "%%";
+        else if (c == '\\' || c == '"' || c == '`' || c == '$') { quoted += '\\'; quoted += c; }
+        else quoted += c;
+    }
+    std::string escaped;
+    for (char c : quoted) {
+        if (c == '\\') escaped += "\\\\";
+        else if (c == '\n') escaped += "\\n";
+        else if (c == '\r') escaped += "\\r";
+        else if (c == '\t') escaped += "\\t";
+        else escaped += c;
+    }
+    return "[Desktop Entry]\nType=Application\nName=Razer Mouse Lite\nExec=\"" + escaped + "\" --tray\nTerminal=false\nHidden=false\n";
 }

@@ -1,35 +1,35 @@
 #pragma once
-#include <QColor>
-#include <QJsonObject>
-#include <QList>
+#include "common.h"
+#include <filesystem>
 
 struct Profile
 {
-    QString id;
-    QString name;
+    std::string id;
+    std::string name;
     int dpi = 1600;
     int pollRate = 0;
     int speed = 10;
     bool acceleration = false;
     bool pointerSettings = true;
-    QString lighting = "static";
-    QColor color = QColor("#55d6a0");
+    std::string lighting = "static";
+    Color color;
     int brightness = 65;
-    QJsonObject toJson() const;
-    static Profile fromJson(const QJsonObject &json);
+    Json toJson() const;
+    static Profile fromJson(const Json& json);
 };
 
 class ProfileStore
 {
 public:
-    explicit ProfileStore(const QString &storagePath = QString()) : storagePath(storagePath) {}
-    QList<Profile> profiles;
-    QString activeId;
-    QString devicePath;
+    explicit ProfileStore(std::filesystem::path storagePath = {}) : storagePath(std::move(storagePath)) {}
+    std::vector<Profile> profiles;
+    std::string activeId;
+    std::string devicePath;
     bool restoreOnStart = false;
-    bool load(QString *error = nullptr);
-    bool save(QString *error = nullptr) const;
-    static QString fileName();
+    bool load(std::string* error = nullptr);
+    bool save(std::string* error = nullptr) const;
+    static std::filesystem::path fileName();
 private:
-    QString storagePath;
+    std::filesystem::path storagePath;
+    bool loadFailed = false;
 };

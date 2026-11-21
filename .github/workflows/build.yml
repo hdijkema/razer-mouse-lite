@@ -57,11 +57,6 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: jurplel/install-qt-action@v4
-        with:
-          version: '6.8.3'
-          arch: win64_msvc2022_64
-          cache: true
       - name: Install pinned Inno Setup compiler
         shell: pwsh
         run: ./tools/install-inno-setup.ps1
@@ -69,7 +64,7 @@ jobs:
         shell: pwsh
         env:
           RELEASE_VERSION: ${{ needs.version.outputs.version }}
-        run: ./build.ps1 -Qt $env:QT_ROOT_DIR -CMake cmake -BuildDirectory ./build/ci -Version $env:RELEASE_VERSION -InnoCompiler ./build/tools/inno-setup/ISCC.exe -TestInstaller
+        run: ./build.ps1 -CMake cmake -BuildDirectory ./build/ci -Version $env:RELEASE_VERSION -InnoCompiler ./build/tools/inno-setup/ISCC.exe -TestInstaller
       - name: Upload Windows packages
         uses: actions/upload-artifact@v6
         with:
@@ -103,18 +98,16 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
-          sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends cmake ninja-build g++ pkg-config file qt6-base-dev qt6-qpa-plugins qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools qt6-svg-dev libudev-dev fonts-dejavu-core dpkg-dev
+          sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends cmake ninja-build g++ pkg-config file libudev-dev libcurl4-openssl-dev libx11-dev libxft-dev libxinerama-dev libxcursor-dev libxfixes-dev libxrender-dev libpng-dev libjpeg-dev zlib1g-dev fonts-dejavu-core xvfb xauth dpkg-dev
       - name: Configure and build
         env:
           RELEASE_VERSION: ${{ needs.version.outputs.version }}
         run: |
-          cmake -S . -B build/ci -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DMOUSE_LITE_VERSION="$RELEASE_VERSION"
+          cmake -S . -B build/ci -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DFLTK_BACKEND_WAYLAND=OFF -DMOUSE_LITE_VERSION="$RELEASE_VERSION"
           cmake --build build/ci --parallel 2
-      - name: Refresh translation source discovery
-        run: /usr/lib/qt6/bin/lupdate src -no-obsolete -ts translations/*.ts
       - name: Test and build Debian package
         run: |
-          ctest --test-dir build/ci --output-on-failure
+          xvfb-run -a ctest --test-dir build/ci --output-on-failure
           mkdir -p release
           cd build/ci
           cpack -G DEB -B ../../release
@@ -150,7 +143,7 @@ jobs:
       - name: Install Debian build dependencies
         run: |
           apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
-          apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends ca-certificates git cmake ninja-build g++ pkg-config file qt6-base-dev qt6-qpa-plugins qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools qt6-svg-dev libudev-dev fonts-dejavu-core dpkg-dev
+          apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends ca-certificates git cmake ninja-build g++ pkg-config file libudev-dev libcurl4-openssl-dev libx11-dev libxft-dev libxinerama-dev libxcursor-dev libxfixes-dev libxrender-dev libpng-dev libjpeg-dev zlib1g-dev fonts-dejavu-core xvfb xauth dpkg-dev
           . /etc/os-release
           test "$ID:$VERSION_ID" = debian:13
           test "$(dpkg --print-architecture)" = amd64
@@ -159,12 +152,11 @@ jobs:
           persist-credentials: false
       - name: Configure and build in Debian 13
         run: |
-          cmake -S . -B build/debian13 -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DMOUSE_LITE_VERSION="$RELEASE_VERSION"
+          cmake -S . -B build/debian13 -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DFLTK_BACKEND_WAYLAND=OFF -DMOUSE_LITE_VERSION="$RELEASE_VERSION"
           cmake --build build/debian13 --parallel 2
       - name: Check translation sources and run tests
         run: |
-          /usr/lib/qt6/bin/lupdate src -no-obsolete -ts translations/*.ts
-          ctest --test-dir build/debian13 --output-on-failure
+          xvfb-run -a ctest --test-dir build/debian13 --output-on-failure
       - name: Package and test installed DEB
         run: |
           mkdir -p release
@@ -174,8 +166,8 @@ jobs:
           test "$(dpkg-deb -f "$package" Architecture)" = amd64
           dpkg-deb -f "$package" Depends
           apt-get install -y "./$package"
-          QT_QPA_PLATFORM=offscreen /usr/bin/razer-mouse --self-test --language en
-          QT_QPA_PLATFORM=offscreen /usr/bin/razer-mouse --smoke-test "$GITHUB_WORKSPACE/build/debian13/installed.png" --language en
+          /usr/bin/razer-mouse --self-test --language en
+          xvfb-run -a /usr/bin/razer-mouse --smoke-test "$GITHUB_WORKSPACE/build/debian13/installed.png" --language en
       - name: Upload Debian 13 package
         uses: actions/upload-artifact@v6
         with:

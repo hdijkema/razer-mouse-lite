@@ -1,241 +1,214 @@
 # Building Razer Mouse Lite
 
-The repository root is the `razer-mouse-lite` folder. Open its `CMakeLists.txt`
-in Qt Creator, or open the folder in VS Code. The `openrazer-win` reference
-checkout is not needed: the device database is already embedded in this project.
+The application uses C++17, FLTK 1.4 and fltk-css. nlohmann/json 3.12.0 is
+vendored as a single header. No Qt SDK, plugins, DLLs or translation tools are
+used. Windows and Linux have platform implementations.
 
-## Requirements
+## Prerequisites
 
-- CMake 3.21 or later and a C++17 compiler.
-- Qt 6.4 or later: Widgets, Network, Concurrent, Svg, and LinguistTools.
-- Windows: Visual Studio 2022 C++ tools and Windows SDK, x64 Qt built for MSVC.
-- Linux: `pkg-config` and `libudev-dev`; optional `xinput` for X11 pointer settings.
+- CMake 3.21+, Git, and a C++17 compiler.
+- Windows: Visual Studio 2022 C++ tools and Windows SDK.
+- Linux: libudev, libcurl, and the X11/font development libraries below.
+- Optional Linux tray runtime: Ayatana AppIndicator GTK3. It is loaded with
+  dlopen; its development headers are not required.
+
+fltk-css is fetched from https://github.com/hdijkema/fltk-css.git by CMake
+FetchContent, pinned to commit 5b936cca8ea009d5a82cfb90ae9ad6d0d4f66b78.
+CI and release builds use that exact revision. Update GIT_TAG in CMakeLists.txt
+after publishing and testing a new library revision.
+
+For local library development, use CMake's standard source override:
+
+    cmake -S . -B build/local -DFETCHCONTENT_SOURCE_DIR_FLTK_CSS=/path/to/fltk-css
+
+This uses the existing checkout directly, without downloading or changing it.
+Remove the override (or use a separate build directory) to return to the pinned
+revision. The former FLTK_CSS_SOURCE_DIR option is no longer used.
+
+CMake finds an installed FLTK 1.4 CONFIG package when available; otherwise
+fltk-css fetches the pinned FLTK 1.4.5 source. The first configure needs network
+access to fetch fltk-css and, unless installed, FLTK. Use FLTK_DIR to select an
+existing FLTK installation. Application builds link the toolkit statically.
 
 ## Windows
 
-With the local default Qt and CMake paths:
+From a Visual Studio Developer terminal:
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
-```
+    cmake -S . -B build/fltk-release -G "Visual Studio 17 2022" -A x64
+    cmake --build build/fltk-release --config Release --target razer-mouse --parallel 4
+    ctest --test-dir build/fltk-release -C Release --output-on-failure
 
-For another SDK or CMake installation:
+Use a new build directory when migrating from the former toolkit. The executable
+is build/fltk-release/Release/razer-mouse.exe. Its editable skins folder is copied
+beside it on every build. The default configuration can also use a system CMake
+or the CMake supplied with your C++ development tools.
 
-```powershell
-.\build.ps1 -Qt C:\Qt\6.8.3\msvc2022_64 -CMake cmake
-```
+The build script builds, tests and stages a portable ZIP:
 
-The script configures a Release build, runs CTest, stages a clean application
-folder, deploys Qt and the MSVC runtime, tests the staged app with development
-paths removed, and creates a portable ZIP under `release/`. `dist/` contains the
-local portable app. The executable stays named `razer-mouse.exe`.
+    .\build.ps1 -CMake cmake
 
-### Inno Setup
+It copies the MSVC runtime, CSS skins, documentation and licenses. The staged
+application is tested with only Windows system directories on PATH. There is no
+deployment-tool step for a GUI framework. Packaging preserves the old generated
+dist directory inside its build fixture before replacing it with the new one,
+so old framework DLLs cannot remain in the new distribution.
 
-Install the pinned compiler into the ignored local build-tools directory, then
-build and test the installer:
+For an Inno Setup installer:
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\install-inno-setup.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -InnoCompiler .\build\tools\inno-setup\ISCC.exe -TestInstaller
-```
+    .\tools\install-inno-setup.ps1
+    .\build.ps1 -CMake cmake -InnoCompiler .\build\tools\inno-setup\ISCC.exe -TestInstaller
 
-The helper verifies the compiler download's SHA-256 checksum. The installer
-supports current-user and all-users installation, with optional desktop shortcut.
-Autostart remains an opt-in setting in the app. Exit the existing app through the
-tray menu before upgrading; the installer does not force-close it.
-
-The installer test uses a private AppId, a directory under `build/`, and a separate
-registry fixture. It tests installation, application startup, repair by reinstall,
-uninstallation, retained untracked data, and removal of the correct startup entry.
-An entry pointing at another copy must be retained. Tests explicitly use
-current-user mode and do not install the app into Program Files.
+The existing installer supports current-user and all-users installation. Tests
+use a private application identity, installation directory and registry key.
+Profiles remain in their historical user settings location and are retained
+across installation, repair and uninstall.
 
 ## Linux
 
-Ubuntu 24.04, Debian 13, or a distribution providing Qt 6.4 or later:
+For Debian/Ubuntu:
 
-```sh
-sudo apt install build-essential cmake ninja-build pkg-config libudev-dev file dpkg-dev \
-    qt6-base-dev qt6-qpa-plugins qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools qt6-svg-dev
-# Optional, for X11 pointer settings:
-sudo apt install xinput
-cmake -S . -B build/linux -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build/linux --parallel
-ctest --test-dir build/linux --output-on-failure
-./build/linux/razer-mouse
-```
+    sudo apt install build-essential cmake ninja-build git pkg-config \
+      libudev-dev libcurl4-openssl-dev libx11-dev libxft-dev libxinerama-dev \
+      libxcursor-dev libxfixes-dev libxrender-dev libpng-dev libjpeg-dev zlib1g-dev
 
-Install the udev rule, reload the rules, and reconnect the mouse:
+    cmake -S . -B build/fltk-release -G Ninja -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX=/usr -DFLTK_BACKEND_WAYLAND=OFF
+    cmake --build build/fltk-release --target razer-mouse --parallel 4
+    ctest --test-dir build/fltk-release --output-on-failure
 
-```sh
-sudo install -m 644 packaging/linux/70-mouse-lite.rules /etc/udev/rules.d/70-mouse-lite.rules
-sudo udevadm control --reload-rules
-```
+For headless rendering tests, install xvfb and xauth and use:
 
-For an installed DEB, the rule is supplied at
-`/usr/share/mouse-lite/70-mouse-lite.rules`. Copy that file to the same
-`/etc/udev/rules.d/` destination and reload/reconnect as above.
-The device must be available through `/dev/hidraw*`. Another driver claiming the
-interface, or another configuration program issuing commands, can interfere.
+    xvfb-run -a ctest --test-dir build/fltk-release --output-on-failure
 
-Optional installation in your user directory:
+The X11 configuration can run under XWayland. Desktop pointer configuration is
+disabled on Wayland: the compositor owns that setting. DPI and lighting use
+hidraw directly and do not depend on a desktop session.
 
-```sh
-cmake --install build/linux --prefix "$HOME/.local"
-```
+Install and package:
 
-Create a distribution-specific DEB using CPack:
+    sudo cmake --install build/fltk-release
+    cd build/fltk-release
+    cpack -G DEB
 
-```sh
-cmake -S . -B build/linux -DCMAKE_INSTALL_PREFIX=/usr
-cmake --build build/linux --parallel
-cd build/linux
-cpack -G DEB
-```
+The DEB derives required system-library dependencies and recommends
+libayatana-appindicator3-1 for the tray. The optional library is not an ELF
+link-time dependency. FLTK/fltk-css development files are not installed into the
+application package.
 
-The package dependencies are derived by `dpkg-shlibdeps` from the build system.
-A package built on Ubuntu 24.04 is not a promise of compatibility with older
-Ubuntu or Debian releases. Other operating systems are rejected by CMake until a
-platform implementation exists.
+Install the supplied permissions rule to use supported devices as a normal user:
 
-To reproduce the Debian 13 CI package, run the build inside Debian 13 (or the
-official `debian:13` container) and give CPack a distribution-specific filename:
+    sudo install -m 644 packaging/linux/70-mouse-lite.rules /etc/udev/rules.d/70-mouse-lite.rules
+    sudo udevadm control --reload-rules
 
-```sh
-cpack --config build/linux/CPackConfig.cmake -G DEB -B release \
-    -D CPACK_PACKAGE_FILE_NAME=razer-mouse-lite-0.3.0-debian13-amd64
-sudo apt install ./release/razer-mouse-lite-0.3.0-debian13-amd64.deb
-```
+Reconnect the mouse afterwards. Do not run the app as root. Optional xinput
+provides pointer speed/acceleration on X11; commands are started with an argument
+vector and bounded execution time, without a shell.
 
-Use the version you configured when building. Renaming an Ubuntu package does
-not turn it into a Debian build: dependencies must be generated in Debian 13.
+### Optional tray and system appearance
+
+On Debian/Ubuntu:
+
+    sudo apt install libayatana-appindicator3-1
+
+The Linux tray tries libayatana-appindicator3.so.1, then the compatible
+libappindicator3.so.1. GTK/GLib/GObject entry points are resolved dynamically and
+checked before use. The backend pumps nonblocking GLib events from FLTK's loop;
+native callbacks queue action identifiers for the application thread. Native
+objects and menu callbacks are released during shutdown.
+
+The desktop must expose an AppIndicator host. If the library or host is missing,
+the settings window stays usable; closing it exits, rather than leaving an
+unreachable hidden application. MOUSE_LITE_DISABLE_TRAY=1 disables tray loading.
+On older AppIndicator versions, primary activation opens the menu; profile
+switching and Next profile are menu actions. Newer versions may expose a direct
+activation signal.
+
+Follow system reads org.freedesktop.portal.Settings over optional GIO, using the
+org.freedesktop.appearance/color-scheme preference. A missing portal or preference
+falls back to light mode. Windows reads AppsUseLightTheme. Changes are checked
+asynchronously every two seconds while following the system.
+
+macOS is an extension point, not a completed mouse backend. The same tray API
+can use AppKit NSStatusItem/NSMenu, matching the author's racket-tray approach;
+HID transport, startup, pointer controls and packaging still need implementation.
+
+## CSS skins
+
+The three templates live in skins/mint, skins/graphite and skins/sand. Each has
+a complete light.css and dark.css. They are copied beside the executable and
+also embedded as a fallback.
+
+Copy a template to <settings directory>/skins/my-skin. Restart to discover a new
+directory, then select it beside Language. Names may contain letters, digits,
+hyphens and underscores. Existing directories can be edited and applied with
+Reload CSS. An invalid stylesheet retains the last working style and reports
+the parser diagnostic.
+
+Lookup order is user skins, executable-adjacent skins, installed shared-data
+skins, then embedded templates. Mode and skin are saved in settings.json next
+to profiles.json; language updates preserve appearance settings and vice versa.
+Existing language preferences are read from the former native registry/INI
+location until a JSON preference is saved.
+
+Supported appearance properties include backgrounds, colors, fonts, font sizes,
+font weight/style, border width/color/radius, selection color and interaction
+states. The styling library's README describes the subset. Widget geometry and
+resizing stay in FLTK. Menus/scrollbars use FLTK's matching native drawing palette.
 
 ## Tests and diagnostics
 
-```sh
-razer-mouse --self-test --language en
-razer-mouse --probe
-razer-mouse --smoke-test preview.png --language fr
-razer-mouse --tray
-```
+    razer-mouse --self-test --language en --catalogues /path/to/translations
+    razer-mouse --smoke-test preview.png --language nl --theme dark --skin mint
+    razer-mouse --version
 
-`--probe` reads the current DPI of a wired Cobra. The self-test checks 458 generated
-lighting packets, exact Cobra packets, response validation, HID descriptors,
-profile migration, atomic saves, XDG autostart encoding, and all eight translation
-catalogues and their placeholders. CTest also checks module boundaries and renders
-each language's settings window. Screenshot tests use fresh sample profiles.
-These commands do not apply mouse or desktop pointer settings, or enable autostart.
+The contract suite checks all bundled models, generated lighting packets, exact
+Cobra packets, CRC rejection, definition validation, versioned caches, atomic
+persistence, Unicode filenames, corrupt-file protection, profile migration,
+translation completeness/placeholders, descriptor parsing and startup escaping.
+It enumerates attached mice read-only; it never applies settings.
 
-## GitHub Actions
+UI tests use isolated sample profiles and a synthetic Cobra. They exercise
+editing/validation, read-only behavior, capabilities, all skins, all appearance
+modes and simulated system changes before rendering a PNG. They do not create a
+tray, modify personal preferences, perform downloads or write to a mouse. A
+graphical session is required; use Xvfb on headless Linux.
 
-`.github/workflows/build.yml` runs on pushes, pull requests, and manual requests.
+The --probe option queries current DPI from a wired Cobra without changing
+settings. Real application of DPI/lighting/pointer settings requires manual
+hardware verification. Packet tests alone do not prove compatibility with every
+listed mouse or operating system.
 
-| Job | Result |
-| --- | --- |
-| version | Validated numeric version and release intent; version resolver tests |
-| windows | Release build, CTest, portable startup test, installer lifecycle test; ZIP and setup EXE artifacts |
-| linux | Release build, CTest, translation checks; Ubuntu 24.04 x86-64 DEB artifact |
-| debian13 | Native Debian 13 container build, CTest, DEB installation and installed-app checks; amd64 DEB artifact |
-| release | Attaches all four packages to a GitHub Release after all builds pass |
+## Structure
 
-Branch pushes and pull requests only build and test. To publish:
+- src/core: STL/JSON profiles, persistence API, localization, HID descriptors and protocol.
+- src/platform: native APIs, atomic replacement, paths, USB channels, desktop integration, HTTPS.
+- src/device: command orchestration and confirmation handling.
+- src/ui: FLTK widgets, CSS skins, asynchronous operations and editor.
+- src/app: command line, startup and application lifetime.
+- translations: eight editable UTF-8 JSON catalogues.
+- tests: protocol, persistence, translations, UI, boundaries, release and installer checks.
 
-- Push a tag matching `X.Y.Z` or `vX.Y.Z`; or
-- Open **Actions → Build and release → Run workflow** and supply `version`.
+The boundary check rejects direct native OS headers outside platform and Qt
+includes in shared modules. Existing windowsSettings profile fields are migrated
+to pointerSettings while reading.
 
-Leave the manual version field empty for a build without publishing. Versions
-must contain three numeric components, no leading zeroes, and values up to 65535.
-The release version is passed through CMake into the executable and installer.
-The default version is declared in `project(... VERSION ...)` in `CMakeLists.txt`.
-A requested version must match a selected tag. Existing release assets are not
-overwritten, and an existing tag must point at the checked-out commit.
+## Device definitions and weekly updates
 
-GitHub runners download their build dependencies. The installed application
-does not need internet access for mouse settings. Its optional device-definition
-update button fetches this repository's `main/data/mice.json` over HTTPS from
-`raw.githubusercontent.com`; no check runs at startup or in the background.
-Workflow logs and screenshots are uploaded separately
-from distributable packages.
+tools/import-reference.ps1 converts reviewed openrazer-win data and recipes into
+data/mice.json. OpenRazer's original data lives in C/Python, rather than this JSON
+format. tools/dpi-recipes.json records reviewed recipe fingerprints; unknown
+protocol changes require source review.
 
-## Source layout
+The update button downloads this project's reviewed JSON using WinHTTP on Windows
+and libcurl on Linux. HTTPS certificate verification remains enabled, redirects
+are refused, transfers use bounded timeouts and payloads are limited to 2 MiB.
+Only validated data is atomically installed. Definition updates never apply a
+profile. The cache records the app version and is revalidated when loaded.
 
-- `src/core/`: profiles, descriptor parsing, protocol; Qt Core/Gui only.
-- `src/platform/`: native Windows and Linux implementations of `platform.h`.
-- `src/device/`: shared command exchange and profile application.
-- `src/ui/`: Qt Widgets and language management; no native OS headers.
-- `src/app/`: startup and single-instance handling.
-- `translations/`: editable Qt Linguist TS files; compiled QM files are embedded.
-- `tests/`: protocol, persistence, translations, module boundaries, packaging.
-- `packaging/`: Linux integration files and Windows Inno Setup definition.
+The existing weekly workflow still checks OpenRazer on Mondays at 05:17 UTC. It
+uses a pinned converter, validates candidate definitions with the C++ tests and
+opens a draft PR only for changed definitions. No merge or publication occurs
+automatically. The workflow now builds the FLTK app and uses Xvfb for screenshots.
 
-The four modules are separate CMake targets with explicit dependencies. When
-adding UI text, update every TS catalogue with Qt Linguist/lupdate and refresh
-`data/messages.json`. Tests reject unfinished translations, mismatched source
-entries, and lost placeholders. Existing profile files using `windowsSettings`
-are migrated when read to the portable `pointerSettings` field.
-
-## Device definition updates
-
-`tools/import-reference.ps1` converts the locally supplied openrazer-win device
-and recipe data into our compact `data/mice.json`. OpenRazer's original definitions
-are C driver code and Python device classes, not this JSON format. Review changes
-to the importer when updating the reference: protocol behaviour can change.
-`tools/dpi-recipes.json` records reviewed DPI recipe fingerprints, so reordering
-the upstream recipe pool cannot silently change DPI commands. Unknown DPI recipes
-stop the importer before it writes the output. Run the complete tests before
-publishing database changes to `main`.
-The C++ validator rejects protocol functions it does not implement, malformed
-recipes, duplicate product IDs, invalid ranges and downloads larger than 2 MiB.
-
-The app uses Qt Network asynchronously, with a 20-second deadline, HTTPS
-certificate verification and no redirects. A validated download is saved using
-`QSaveFile` as `device-definitions.json` beside the profile data. The cache records
-the app version; a different app version or invalid cache falls back to the bundled
-definitions. Reinstalling or upgrading the app therefore cannot accidentally use
-definitions cached for a different engine version. Tests use temporary directories
-and the bundled database rather than a user's saved definitions.
-
-### Weekly OpenRazer check
-
-`.github/workflows/sync-openrazer.yml` runs Mondays at 05:17 UTC and can also be
-started from **Actions → Check OpenRazer mouse updates → Run workflow**. It tracks
-the mouse driver/header and daemon mouse/base classes in OpenRazer's `master`
-branch. Without relevant source changes it skips conversion and building. If
-conversion produces identical definitions, it opens no PR.
-
-The workflow reads OpenRazer itself. It uses three generator files from a pinned
-openrazer-win commit to extract and translate that checkout; pending patches from
-the Windows port are excluded. Python is a CI tool for these external generators,
-not an application dependency. Our app and database validator remain C++.
-
-`data/openrazer-source.json` records the pinned converter, source revision and
-file fingerprints. A null revision bootstraps the first direct OpenRazer sync.
-Changes to the shared packet builders/transport headers stop the automation for
-manual C++ review (a driver version-string bump alone is ignored). New DPI recipe
-shapes also require review. Conversion diagnostics are retained as artifacts.
-
-Changed candidates are compiled and run through all CTest checks before a separate
-job with write permissions creates or refreshes the single draft PR branch
-`automation/openrazer-mice`. Only the two database/checkpoint files enter the PR;
-upstream code executes in the read-only conversion job. No automatic merge is set.
-After the PR is merged, the app's update button can fetch the new definitions.
-
-The default `GITHUB_TOKEN` does not trigger ordinary push/PR workflows for bot
-commits. The action explicitly dispatches `build.yml` for the candidate branch,
-so Windows, Ubuntu and Debian 13 builds still run without a personal access token.
-GitHub must allow Actions to create PRs in **Settings → Actions → General →
-Workflow permissions → Allow GitHub Actions to create and approve pull requests**.
-The workflow only creates PRs; it never approves them.
-
-To reproduce conversion in a clean checkout, clone OpenRazer and the converter
-revision from the checkpoint, then run:
-
-```sh
-pwsh ./tools/sync-openrazer.ps1 -Upstream /path/to/openrazer -CheckOnly
-pwsh ./tests/test-import-reference.ps1 -Reference /path/to/openrazer-win
-pwsh ./tools/sync-openrazer.ps1 -Upstream /path/to/openrazer -Converter /path/to/openrazer-win
-```
-
-The last command updates candidate data in that checkout when definitions differ.
-Build and run CTest before merging it.
+A version tag or explicitly versioned manual release run publishes only after
+Windows, Ubuntu and Debian 13 jobs succeed. Normal pushes only build/test.

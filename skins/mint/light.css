@@ -1,0 +1,35 @@
+/* Mint / light. Geometry is managed by FLTK. */
+window { background: #f4f6f0; color: #243d30; font-family: "Segoe UI", "Inter", "DejaVu Sans", sans-serif; font-size: 13px; }
+label { background: inherit; }
+.rail { background: #e5ecdf; }
+.brand { font-size: 25px; font-weight: bold; }
+.subtitle { color: #63796b; font-size: 12px; }
+.section { color: #58735f; font-size: 11px; font-weight: bold; }
+.card { background: #ffffff; border: 1px solid #d1ddcc; border-radius: 12px; }
+.card-title { color: #34553c; font-size: 16px; font-weight: bold; }
+.muted { color: #667c6c; font-size: 11px; }
+.badge { background: #dcecd2; color: #355b31; border-radius: 9px; font-size: 12px; }
+button { background: #ecf1e7; color: #35503c; border: 1px solid #b7cbb0; border-radius: 7px; font-size: 12px; }
+button:hover { background: #dceacf; border-color: #7b9b69; }
+button:active { background: #cadfb8; border-color: #5e8e4a; }
+button:focus { border: 2px solid #517d3d; }
+button.primary { background: #42713a; color: #ffffff; border-color: #42713a; font-weight: bold; }
+button.primary:hover { background: #568848; border-color: #568848; }
+button.primary:focus { border: 2px solid white; }
+button:disabled, input:disabled, choice:disabled, slider:disabled { background: #e9eee3; color: #98a98e; border-color: #d3dfca; }
+input, choice { background: #ffffff; color: #294a32; border: 1px solid #b5c9a8; border-radius: 6px; selection-color: #c3dcad; }
+input:focus, choice:focus { border: 2px solid #5c8745; }
+.profile { background: #f0f4e9; color: #354f38; border: 1px solid #c0d0b5; border-radius: 9px; font-size: 14px; }
+.profile:checked { background: #dbe9ce; border-color: #5c8745; }
+.profile:hover { background: #e2edd8; border-color: #5c8745; }
+.status { background: #e8f1df; color: #3c6435; border: 1px solid #c0d3b1; border-radius: 8px; font-size: 12px; }
+.status.error { background: #fff0e8; color: #864631; border-color: #d6ab92; }
+slider { background: #e7eddf; color: #517e3e; border: 1px solid #b5c7a7; border-radius: 5px; }
+check { background: inherit; color: #3e5941; font-size: 12px; }
+check:focus { border-color: #5e8a48; }
+
+.editor { background: #f4f6f0; }
+.profile-list { background: #e5ecdf; }
+.theme-mode { font-size: 11px; border-radius: 6px; }
+.theme-mode:checked { background: #d1e3c0; color: #365f2a; border-color: #42713a; }
+check { selection-color: #42713a; }
