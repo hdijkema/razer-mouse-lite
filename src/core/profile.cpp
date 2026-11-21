@@ -1,100 +1,93 @@
-﻿#include "profile.h"
-#include <QDir>
-#include <QCoreApplication>
-#include <QFile>
-#include <QFileInfo>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QSaveFile>
-#include <QStandardPaths>
-#include <QUuid>
+#include "profile.h"
+#include "files.h"
+#include "i18n.h"
+#include <set>
 
-QJsonObject Profile::toJson() const
+Json Profile::toJson() const
 {
     return {{"id", id}, {"name", name}, {"dpi", dpi}, {"pollRate", pollRate}, {"speed", speed},
-            {"acceleration", acceleration}, {"pointerSettings", pointerSettings},
-            {"lighting", lighting}, {"color", color.name()}, {"brightness", brightness}};
+        {"acceleration", acceleration}, {"pointerSettings", pointerSettings},
+        {"lighting", lighting}, {"color", color.hex()}, {"brightness", brightness}};
 }
-
-Profile Profile::fromJson(const QJsonObject &json)
+Profile Profile::fromJson(const Json& json)
 {
     Profile p;
-    p.id = json.value("id").toString(QUuid::createUuid().toString(QUuid::WithoutBraces));
-    p.name = json.value("name").toString(QCoreApplication::translate("Profiles", "Profile")).left(80);
-    p.dpi = qBound(100, json.value("dpi").toInt(1600), 45000);
-    p.pollRate = json.value("pollRate").toInt();
-    if (!QList<int>{0, 125, 500, 1000}.contains(p.pollRate)) p.pollRate = 0;
-    p.speed = qBound(1, json.value("speed").toInt(10), 20);
-    p.acceleration = json.value("acceleration").toBool();
-    p.pointerSettings = json.value("pointerSettings").toBool(json.value("windowsSettings").toBool(true));
-    p.lighting = json.value("lighting").toString("static");
-    if (!QStringList{"static", "off", "keep"}.contains(p.lighting)) p.lighting = "keep";
-    p.color = QColor(json.value("color").toString("#55d6a0"));
-    if (!p.color.isValid()) p.color = QColor("#55d6a0");
-    p.brightness = qBound(0, json.value("brightness").toInt(65), 100);
+    p.id = text(json, "id");
+    if (p.id.empty()) p.id = newId();
+    p.name = text(json, "name", tr("Profiles", "Profile"));
+    // Keep complete UTF-8 characters while limiting the editor to 80 characters.
+    std::size_t end = 0, characters = 0;
+    while (end < p.name.size()) {
+        if ((static_cast<unsigned char>(p.name[end]) & 0xc0) != 0x80 && ++characters > 80) break;
+        ++end;
+    }
+    p.name.resize(end);
+    p.dpi = std::clamp(number(json, "dpi", 1600), 100, 45000);
+    p.pollRate = number(json, "pollRate");
+    if (p.pollRate != 0 && p.pollRate != 125 && p.pollRate != 500 && p.pollRate != 1000) p.pollRate = 0;
+    p.speed = std::clamp(number(json, "speed", 10), 1, 20);
+    p.acceleration = jsonBool(json, "acceleration");
+    p.pointerSettings = jsonBool(json, "pointerSettings", jsonBool(json, "windowsSettings", true));
+    p.lighting = text(json, "lighting", "static");
+    if (p.lighting != "static" && p.lighting != "off" && p.lighting != "keep") p.lighting = "keep";
+    p.color = Color::fromHex(text(json, "color", "#55d6a0"));
+    p.brightness = std::clamp(number(json, "brightness", 65), 0, 100);
     return p;
 }
+std::filesystem::path ProfileStore::fileName() { return Files::configDirectory() / "profiles.json"; }
 
-QString ProfileStore::fileName()
+bool ProfileStore::load(std::string* error)
 {
-    return QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation) + "/profiles.json";
-}
-
-bool ProfileStore::load(QString *error)
-{
-    QFile file(storagePath.isEmpty() ? fileName() : storagePath);
-    if (file.exists()) {
-        if (!file.open(QIODevice::ReadOnly)) { if (error) *error = file.errorString(); return false; }
-        QJsonParseError parse;
-        const auto document = QJsonDocument::fromJson(file.readAll(), &parse);
-        if (parse.error != QJsonParseError::NoError || !document.isObject()
-            || document.object().value("schema").toInt() != 1
-            || !document.object().value("profiles").isArray()) {
-            if (error) *error = QCoreApplication::translate("Profiles", "Invalid profile file. The file will not be overwritten.");
+    const auto target = storagePath.empty() ? fileName() : storagePath;
+    std::vector<Profile> candidate;
+    std::string nextActive, nextDevice;
+    bool nextRestore = false;
+    std::error_code ec;
+    const bool exists = std::filesystem::exists(target, ec);
+    if (ec) { if (error) *error = ec.message(); loadFailed = true; return false; }
+    if (exists) {
+        std::string bytes;
+        if (!Files::read(target, bytes, 4 * 1024 * 1024, error)) { loadFailed = true; return false; }
+        const auto root = Json::parse(bytes, nullptr, false);
+        if (!root.is_object() || number(root, "schema") != 1 || !field(root, "profiles").is_array()) {
+            if (error) *error = tr("Profiles", "Invalid profile file. The file will not be overwritten.");
+            loadFailed = true;
             return false;
         }
-        const auto root = document.object();
-        for (const auto &entry : root.value("profiles").toArray()) {
-            if (!entry.isObject()) continue;
-            auto p = Profile::fromJson(entry.toObject());
-            bool duplicate = false;
-            for (const auto &existing : profiles) if (existing.id == p.id) duplicate = true;
-            if (duplicate) p.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
-            profiles.append(p);
+        std::set<std::string> ids;
+        for (const auto& entry : array(root, "profiles")) {
+            if (!entry.is_object()) continue;
+            auto profile = Profile::fromJson(entry);
+            if (!ids.insert(profile.id).second) { profile.id = newId(); ids.insert(profile.id); }
+            candidate.push_back(std::move(profile));
         }
-        activeId = root.value("activeId").toString();
-        devicePath = root.value("devicePath").toString();
-        restoreOnStart = root.value("restoreOnStart").toBool();
+        nextActive = text(root, "activeId");
+        nextDevice = text(root, "devicePath");
+        nextRestore = jsonBool(root, "restoreOnStart");
     }
-    if (profiles.isEmpty()) {
+    if (candidate.empty()) {
+        const char* names[] = {"Everyday", "Precision", "Fast"};
+        const char* colors[] = {"#55d6a0", "#7ca9ff", "#f2b96a"};
+        const int dpi[] = {1600, 800, 3200};
         for (int i = 0; i < 3; ++i) {
             Profile p;
-            p.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
-            p.name = QStringList{QCoreApplication::translate("Profiles", "Everyday"), QCoreApplication::translate("Profiles", "Precision"), QCoreApplication::translate("Profiles", "Fast")}.at(i);
-            p.dpi = QList<int>{1600, 800, 3200}.at(i);
-            p.color = QColor(QStringList{"#55d6a0", "#7ca9ff", "#f2b96a"}.at(i));
-            profiles.append(p);
+            p.id = newId(); p.name = tr("Profiles", names[i]); p.dpi = dpi[i]; p.color = Color::fromHex(colors[i]);
+            candidate.push_back(std::move(p));
         }
     }
+    profiles = std::move(candidate); activeId = std::move(nextActive); devicePath = std::move(nextDevice); restoreOnStart = nextRestore;
+    loadFailed = false;
     return true;
 }
-
-bool ProfileStore::save(QString *error) const
+bool ProfileStore::save(std::string* error) const
 {
-    const QString target = storagePath.isEmpty() ? fileName() : storagePath;
-    if (!QDir().mkpath(QFileInfo(target).absolutePath())) {
-        if (error) *error = QCoreApplication::translate("Profiles", "Could not create the settings folder.");
+    if (loadFailed) {
+        if (error) *error = tr("Profiles", "Invalid profile file. The file will not be overwritten.");
         return false;
     }
-    QJsonArray entries;
-    for (const auto &profile : profiles) entries.append(profile.toJson());
-    const QByteArray data = QJsonDocument(QJsonObject{{"schema", 1}, {"profiles", entries},
-        {"activeId", activeId}, {"devicePath", devicePath}, {"restoreOnStart", restoreOnStart}}).toJson();
-    QSaveFile file(target);
-    if (!file.open(QIODevice::WriteOnly) || file.write(data) != data.size() || !file.commit()) {
-        if (error) *error = file.errorString();
-        return false;
-    }
-    return true;
+    Json entries = Json::array();
+    for (const auto& profile : profiles) entries.push_back(profile.toJson());
+    return Files::atomicWrite(storagePath.empty() ? fileName() : storagePath,
+        Json{{"schema", 1}, {"profiles", entries}, {"activeId", activeId}, {"devicePath", devicePath},
+            {"restoreOnStart", restoreOnStart}}.dump(2), error);
 }
-

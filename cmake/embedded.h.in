@@ -1,0 +1,8 @@
+#pragma once
+#include <string>
+namespace Embedded {
+@MOUSE_CPP@
+@MESSAGE_CPP@
+@TRANSLATION_CPP@
+@SKIN_CPP@
+}

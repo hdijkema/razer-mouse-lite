@@ -45,9 +45,9 @@ try {
     Set-Content -LiteralPath $marker -Value $identity -Encoding ASCII
     $markerHash = (Get-FileHash -LiteralPath $marker).Hash
     # The resolved target is inside the checked fixture, never the user's portable app.
-    Remove-Item -LiteralPath (Join-Path $installed 'Qt6Svg.dll')
+    Remove-Item -LiteralPath (Join-Path $installed 'skins/mint/dark.css')
     Invoke-TestProcess $setup @('/CURRENTUSER','/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/NOICONS',"/DIR=`"$installed`"","/LOG=`"$fixture/reinstall.log`"")
-    if (!(Test-Path -LiteralPath (Join-Path $installed 'Qt6Svg.dll'))) { throw 'Reinstall did not restore an installed file.' }
+    if (!(Test-Path -LiteralPath (Join-Path $installed 'skins/mint/dark.css'))) { throw 'Reinstall did not restore an installed file.' }
     New-Item -Path $registryPath -Force | Out-Null
     New-ItemProperty -LiteralPath $registryPath -Name RazerMouseLite -Value "`"$exe`" --tray" -Force | Out-Null
     Invoke-TestProcess $uninstaller @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',"/LOG=`"$fixture/uninstall.log`"")

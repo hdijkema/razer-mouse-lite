@@ -1,168 +1,121 @@
 #include "devicedatabase.h"
 #include "razerprotocol.h"
-#include <QCoreApplication>
-#include <QDir>
-#include <QFile>
-#include <QFileInfo>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QMap>
-#include <QReadWriteLock>
-#include <QSaveFile>
-#include <QSet>
-#include <QStandardPaths>
-#include <cmath>
+#include "files.h"
+#include "embedded.h"
+#include <map>
+#include <mutex>
+#include <set>
+#include <shared_mutex>
 
 namespace {
-QReadWriteLock databaseLock;
-QJsonArray installedModels;
-
-bool integer(const QJsonValue &value, int minimum, int maximum)
+std::shared_mutex databaseLock;
+Json installedModels = Json::array();
+bool integer(const Json& value, int minimum, int maximum)
 {
-    return value.isDouble() && std::isfinite(value.toDouble())
-        && value.toDouble() == std::floor(value.toDouble())
-        && value.toDouble() >= minimum && value.toDouble() <= maximum;
+    if (!value.is_number()) return false;
+    const double n = value.get<double>();
+    return std::isfinite(n) && n == std::floor(n) && n >= minimum && n <= maximum;
 }
-
-bool recipe(const QJsonValue &value)
+bool recipe(const Json& value)
 {
-    if (!value.isArray() || value.toArray().size() > 32) return false;
-    const QMap<QString, int> functions{
-        {"get_razer_report", 3},
-        {"razer_chroma_standard_set_led_state", 3},
-        {"razer_chroma_standard_set_led_effect", 3},
-        {"razer_chroma_standard_set_led_brightness", 3},
-        {"razer_chroma_standard_set_led_rgb", 3},
-        {"razer_chroma_standard_matrix_effect_static", 1},
-        {"razer_chroma_standard_matrix_effect_none", 0},
-        {"razer_chroma_extended_matrix_brightness", 3},
-        {"razer_chroma_extended_matrix_effect_static", 3},
-        {"razer_chroma_extended_matrix_effect_none", 2},
-        {"razer_chroma_mouse_extended_matrix_effect_static", 3},
-        {"razer_chroma_mouse_extended_matrix_effect_none", 2},
-        {"razer_naga_trinity_effect_static", 1},
-        {"razer_naga_trinity_effect_none", 0},
-        {"razer_basilisk_mobile_effect_static", 1}
-    };
+    if (!value.is_array() || value.size() > 32) return false;
+    static const std::map<std::string, int> functions = {
+        {"get_razer_report", 3}, {"razer_chroma_standard_set_led_state", 3},
+        {"razer_chroma_standard_set_led_effect", 3}, {"razer_chroma_standard_set_led_brightness", 3},
+        {"razer_chroma_standard_set_led_rgb", 3}, {"razer_chroma_standard_matrix_effect_static", 1},
+        {"razer_chroma_standard_matrix_effect_none", 0}, {"razer_chroma_extended_matrix_brightness", 3},
+        {"razer_chroma_extended_matrix_effect_static", 3}, {"razer_chroma_extended_matrix_effect_none", 2},
+        {"razer_chroma_mouse_extended_matrix_effect_static", 3}, {"razer_chroma_mouse_extended_matrix_effect_none", 2},
+        {"razer_naga_trinity_effect_static", 1}, {"razer_naga_trinity_effect_none", 0}, {"razer_basilisk_mobile_effect_static", 1}};
     bool built = false;
-    for (const auto &entry : value.toArray()) {
-        if (!entry.isObject()) return false;
-        const auto step = entry.toObject();
-        const auto op = step.value("op").toString();
+    for (const auto& step : value) {
+        if (!step.is_object()) return false;
+        const auto op = text(step, "op");
         if (op == "build") {
-            const auto fn = step.value("fn").toString();
-            if (!functions.contains(fn) || !step.value("args").isArray()) return false;
-            const auto args = step.value("args").toArray();
-            if (args.size() != functions.value(fn)) return false;
-            for (const auto &argument : args) {
-                const auto arg = argument.toObject();
-                const auto kind = arg.value("k").toString();
-                if (kind == "const") { if (!integer(arg.value("value"), 0, 255)) return false; }
-                else if (kind == "var") { if (arg.value("name") != "brightness") return false; }
-                else if (kind == "rgb") { if (!integer(arg.value("offset"), 0, 0)) return false; }
+            const auto fn = text(step, "fn");
+            const auto found = functions.find(fn);
+            if (found == functions.end() || !field(step, "args").is_array()) return false;
+            const auto& args = array(step, "args");
+            if (args.size() != static_cast<std::size_t>(found->second)) return false;
+            for (const auto& arg : args) {
+                const auto kind = text(arg, "k");
+                if (kind == "const") { if (!integer(field(arg, "value"), 0, 255)) return false; }
+                else if (kind == "var") { if (text(arg, "name") != "brightness") return false; }
+                else if (kind == "rgb") { if (!integer(field(arg, "offset"), 0, 0)) return false; }
                 else return false;
             }
-            if (fn == "get_razer_report" && (args.at(0).toObject().value("value") != 15
-                || args.at(1).toObject().value("value") != 2 || args.at(2).toObject().value("value") != 6)) return false;
+            if (fn == "get_razer_report" && (field(args[0], "value") != 15 || field(args[1], "value") != 2 || field(args[2], "value") != 6)) return false;
             built = true;
         } else if (op == "txid" || op == "set_arg") {
-            if (!built || !integer(step.value("value").toObject().value("value"), 0, 255)) return false;
-            if (op == "set_arg" && !integer(step.value("index"), 0, 79)) return false;
+            if (!built || !integer(field(field(step, "value"), "value"), 0, 255)) return false;
+            if (op == "set_arg" && !integer(field(step, "index"), 0, 79)) return false;
         } else if (op == "send") { if (!built) return false; }
         else if (op != "stop") return false;
     }
     try {
-        RazerProtocol::lightingReports(value.toArray(), QColor("#123456"), 0);
-        RazerProtocol::lightingReports(value.toArray(), QColor("#abcdef"), 100);
+        RazerProtocol::lightingReports(value, Color::fromHex("#123456"), 0);
+        RazerProtocol::lightingReports(value, Color::fromHex("#abcdef"), 100);
     } catch (...) { return false; }
     return true;
 }
 }
-
-QJsonArray DeviceDatabase::bundled()
+Json DeviceDatabase::bundled()
 {
-    static const auto database = [] {
-        QFile file(":/data/mice.json");
-        if (!file.open(QIODevice::ReadOnly)) return QJsonArray{};
-        return QJsonDocument::fromJson(file.readAll()).array();
-    }();
-    return database;
+    static const Json data = Json::parse(Embedded::mice);
+    return data;
 }
-
-QJsonArray DeviceDatabase::models()
+Json DeviceDatabase::models()
 {
-    QReadLocker locker(&databaseLock);
-    return installedModels.isEmpty() ? bundled() : installedModels;
+    std::shared_lock<std::shared_mutex> lock(databaseLock);
+    return installedModels.empty() ? bundled() : installedModels;
 }
-
-bool DeviceDatabase::validate(const QByteArray &data, QJsonArray *models)
+bool DeviceDatabase::validate(const std::string& data, Json* models)
 {
-    if (data.isEmpty() || data.size() > maximumBytes) return false;
-    QJsonParseError error;
-    const auto document = QJsonDocument::fromJson(data, &error);
-    if (error.error != QJsonParseError::NoError || !document.isArray()) return false;
-    const auto array = document.array();
-    if (array.isEmpty() || array.size() > 2048) return false;
-    QSet<int> pids;
-    const QSet<QString> fields{"pid", "name", "maxDpi", "dpiByte", "dpiTx", "interface", "waitUs", "zones", "pollTx"};
-    for (const auto &value : array) {
-        if (!value.isObject()) return false;
-        const auto model = value.toObject();
-        if (model.size() != fields.size()) return false;
-        for (const auto &key : model.keys()) if (!fields.contains(key)) return false;
-        if (!integer(model.value("pid"), 1, 65535) || pids.contains(model.value("pid").toInt())
-            || !integer(model.value("maxDpi"), 100, 65535) || !model.value("dpiByte").isBool()
-            || !integer(model.value("dpiTx"), 0, 255) || !integer(model.value("pollTx"), -1, 255)
-            || !integer(model.value("interface"), 0, 15) || !integer(model.value("waitUs"), 0, 1000000)
-            || model.value("name").toString().trimmed().isEmpty() || model.value("name").toString().size() > 160
-            || !model.value("zones").isArray() || model.value("zones").toArray().size() > 5) return false;
-        if (model.value("dpiByte").toBool() && model.value("maxDpi").toInt() > 25500) return false;
-        pids.insert(model.value("pid").toInt());
-        QSet<QString> zones;
-        for (const auto &entry : model.value("zones").toArray()) {
-            const auto zone = entry.toObject();
-            const auto name = zone.value("name").toString();
-            if (zone.size() != 4 || !QSet<QString>{"backlight", "logo", "scroll", "left", "right"}.contains(name)
-                || zones.contains(name) || !recipe(zone.value("color")) || !recipe(zone.value("off"))
-                || !recipe(zone.value("brightness"))) return false;
-            zones.insert(name);
+    if (data.empty() || data.size() > maximumBytes) return false;
+    const auto candidate = Json::parse(data, nullptr, false);
+    if (!candidate.is_array() || candidate.empty() || candidate.size() > 2048) return false;
+    std::set<int> pids;
+    static const std::set<std::string> fields = {"pid", "name", "maxDpi", "dpiByte", "dpiTx", "interface", "waitUs", "zones", "pollTx"};
+    for (const auto& model : candidate) {
+        if (!model.is_object() || model.size() != fields.size()) return false;
+        for (auto it = model.begin(); it != model.end(); ++it) if (!fields.count(it.key())) return false;
+        if (!integer(field(model, "pid"), 1, 65535) || !pids.insert(number(model, "pid")).second
+            || !integer(field(model, "maxDpi"), 100, 65535) || !field(model, "dpiByte").is_boolean()
+            || !integer(field(model, "dpiTx"), 0, 255) || !integer(field(model, "pollTx"), -1, 255)
+            || !integer(field(model, "interface"), 0, 15) || !integer(field(model, "waitUs"), 0, 1000000)
+            || trim(text(model, "name")).empty() || text(model, "name").size() > 640
+            || !field(model, "zones").is_array() || array(model, "zones").size() > 5) return false;
+        if (jsonBool(model, "dpiByte") && number(model, "maxDpi") > 25500) return false;
+        std::set<std::string> zones;
+        for (const auto& zone : array(model, "zones")) {
+            const auto name = text(zone, "name");
+            if (!zone.is_object() || zone.size() != 4 || !std::set<std::string>{"backlight", "logo", "scroll", "left", "right"}.count(name)
+                || !zones.insert(name).second || !recipe(field(zone, "color")) || !recipe(field(zone, "off")) || !recipe(field(zone, "brightness"))) return false;
         }
     }
-    if (models) *models = array;
+    if (models) *models = candidate;
     return true;
 }
-
-QString DeviceDatabase::cachePath()
+std::filesystem::path DeviceDatabase::cachePath() { return Files::configDirectory() / "device-definitions.json"; }
+bool DeviceDatabase::install(const std::string& data, const std::filesystem::path& path, std::string* error)
 {
-    return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/device-definitions.json";
-}
-
-bool DeviceDatabase::install(const QByteArray &data, const QString &path, QString *error)
-{
-    QJsonArray candidate;
-    if (!validate(data, &candidate)) return false;
-    const QJsonObject envelope{{"format", 1}, {"appVersion", QCoreApplication::applicationVersion()}, {"models", candidate}};
-    if (!QDir().mkpath(QFileInfo(path).absolutePath())) { if (error) *error = path; return false; }
-    QSaveFile file(path);
-    const auto bytes = QJsonDocument(envelope).toJson(QJsonDocument::Compact);
-    if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() || !file.commit()) {
-        if (error) *error = file.errorString();
-        return false;
-    }
-    QWriteLocker locker(&databaseLock);
-    installedModels = candidate;
+    Json candidate;
+    if (!validate(data, &candidate)) { if (error) *error = "Invalid device definitions"; return false; }
+    const Json envelope = {{"format", 1}, {"appVersion", MOUSE_LITE_VERSION}, {"models", candidate}};
+    if (!Files::atomicWrite(path, envelope.dump(), error)) return false;
+    std::unique_lock<std::shared_mutex> lock(databaseLock);
+    installedModels = std::move(candidate);
     return true;
 }
-
-bool DeviceDatabase::load(const QString &path)
+bool DeviceDatabase::load(const std::filesystem::path& path)
 {
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly) || file.size() > maximumBytes + 1024) return false;
-    const auto envelope = QJsonDocument::fromJson(file.readAll()).object();
-    if (envelope.value("format") != 1 || envelope.value("appVersion") != QCoreApplication::applicationVersion()) return false;
-    QJsonArray candidate;
-    if (!validate(QJsonDocument(envelope.value("models").toArray()).toJson(QJsonDocument::Compact), &candidate)) return false;
-    QWriteLocker locker(&databaseLock);
-    installedModels = candidate;
+    std::string bytes;
+    if (!Files::read(path, bytes, maximumBytes + 1024)) return false;
+    const auto envelope = Json::parse(bytes, nullptr, false);
+    if (field(envelope, "format") != 1 || text(envelope, "appVersion") != MOUSE_LITE_VERSION || !field(envelope, "models").is_array()) return false;
+    Json candidate;
+    if (!validate(field(envelope, "models").dump(), &candidate)) return false;
+    std::unique_lock<std::shared_mutex> lock(databaseLock);
+    installedModels = std::move(candidate);
     return true;
 }

@@ -1,1 +1,394 @@
-[{"source":"HID write failed: %1","context":"Backend"},{"source":"HID read failed: %1","context":"Backend"},{"source":"Mouse rejected command %1:%2 (status %3). Close other mouse software and try again.","context":"Backend"},{"source":"No confirmation from the mouse. Close other mouse software and try again.","context":"Backend"},{"source":"This diagnostic requires a wired Razer Cobra.","context":"Backend"},{"source":"Razer Cobra reports DPI X=%1, Y=%2. No settings changed.","context":"Backend"},{"source":"No supported mouse connected. Connect the mouse using USB and click Refresh.","context":"Backend"},{"source":"Polling rate is not supported for this model. Select Keep current.","context":"Backend"},{"source":"This lighting mode is not supported.","context":"Backend"},{"source":"Could not open mouse: %1","context":"Backend"},{"source":"Profile \u0027%1\u0027 applied · %2 DPI","context":"Backend"},{"source":" Earlier hardware commands have not been rolled back.","context":"Backend"},{"source":"Incomplete HID transfer.","context":"Platform"},{"source":"Cannot access %1: %2. Install the supplied udev rule and reconnect the mouse.","context":"Platform"},{"source":"Mouse identity changed. Click Refresh and try again.","context":"Platform"},{"source":"Could not update automatic startup.","context":"Platform"},{"source":"Applies to the selected X11/libinput mouse. Games using raw input may ignore these settings.","context":"Platform"},{"source":"Pointer speed and acceleration are managed by your Wayland desktop, or require xinput on X11. DPI and lighting still work.","context":"Platform"},{"source":"Could not find the selected mouse in X11.","context":"Platform"},{"source":"Could not change the selected mouse\u0027s X11/libinput pointer settings.","context":"Platform"},{"source":"Applies to all mice. Games using raw input may ignore these settings.","context":"Platform"},{"source":"Could not read desktop pointer settings.","context":"Platform"},{"source":"Could not change pointer acceleration.","context":"Platform"},{"source":"Could not change pointer speed.","context":"Platform"},{"source":"Profile","context":"Profiles"},{"source":"Invalid profile file. The file will not be overwritten.","context":"Profiles"},{"source":"Everyday","context":"Profiles"},{"source":"Precision","context":"Profiles"},{"source":"Fast","context":"Profiles"},{"source":"Could not create the settings folder.","context":"Profiles"},{"source":"DPI is outside this mouse\u0027s supported range.","context":"Protocol"},{"source":"This mouse supports DPI in steps of 100.","context":"Protocol"},{"source":"Unknown protocol argument.","context":"Protocol"},{"source":"Unknown protocol function: %1","context":"Protocol"},{"source":"Invalid protocol index.","context":"Protocol"},{"source":"Invalid protocol step.","context":"Protocol"},{"source":"No supported USB mouse found","context":"RazerMouseWindow"},{"source":"No profile applied yet","context":"RazerMouseWindow"},{"source":"Your mouse. Your settings. Done.","context":"RazerMouseWindow"},{"source":"Refresh","context":"RazerMouseWindow"},{"source":"Looking for USB mice…","context":"RazerMouseWindow"},{"source":"PROFILES","context":"RazerMouseWindow"},{"source":"Click a profile to apply\nit immediately.","context":"RazerMouseWindow"},{"source":"+ New","context":"RazerMouseWindow"},{"source":"Delete","context":"RazerMouseWindow"},{"source":"Profile name","context":"RazerMouseWindow"},{"source":"Sensor","context":"RazerMouseWindow"},{"source":"Sensitivity","context":"RazerMouseWindow"},{"source":"Keep current","context":"RazerMouseWindow"},{"source":"Polling rate","context":"RazerMouseWindow"},{"source":"Desktop pointer","context":"RazerMouseWindow"},{"source":"Include desktop pointer settings in this profile","context":"RazerMouseWindow"},{"source":"Speed","context":"RazerMouseWindow"},{"source":"Enable pointer acceleration","context":"RazerMouseWindow"},{"source":"Lighting","context":"RazerMouseWindow"},{"source":"Static color","context":"RazerMouseWindow"},{"source":"Off","context":"RazerMouseWindow"},{"source":"Effect / color","context":"RazerMouseWindow"},{"source":"Brightness","context":"RazerMouseWindow"},{"source":"Profile color","context":"RazerMouseWindow"},{"source":"Save","context":"RazerMouseWindow"},{"source":"Save and apply","context":"RazerMouseWindow"},{"source":"Save changes before switching profiles.","context":"RazerMouseWindow"},{"source":"Profile saved. Click the profile to apply it.","context":"RazerMouseWindow"},{"source":"New profile","context":"RazerMouseWindow"},{"source":"Delete profile","context":"RazerMouseWindow"},{"source":"Delete profile \u0027%1\u0027?","context":"RazerMouseWindow"},{"source":"Cancel","context":"RazerMouseWindow"},{"source":"Start at login","context":"RazerMouseWindow"},{"source":"Restore active profile on startup / reconnect","context":"RazerMouseWindow"},{"source":"Language (restart required)","context":"RazerMouseWindow"},{"source":"System language","context":"RazerMouseWindow"},{"source":"Language saved. Restart Razer Mouse Lite to apply it.","context":"RazerMouseWindow"},{"source":"Could not save the language preference.","context":"RazerMouseWindow"},{"source":"Choose a profile or edit its settings.","context":"RazerMouseWindow"},{"source":"Enter a profile name.","context":"RazerMouseWindow"},{"source":"Could not save: %1","context":"RazerMouseWindow"},{"source":"No supported mouse connected. Connect the mouse using USB and click Refresh.","context":"RazerMouseWindow"},{"source":"Applying profile \u0027%1\u0027…","context":"RazerMouseWindow"},{"source":"Razer Mouse Lite · %1\nClick: next profile · Double-click: settings","context":"RazerMouseWindow"},{"source":"Open settings","context":"RazerMouseWindow"},{"source":"Quit","context":"RazerMouseWindow"},{"source":"Detected automatically · 100–%1 DPI · ","context":"RazerMouseWindow"},{"source":"No RGB control for this model","context":"RazerMouseWindow"},{"source":"DPI and lighting over USB","context":"RazerMouseWindow"},{"source":"Connect your Razer mouse using USB. You can save profiles in advance.","context":"RazerMouseWindow"},{"context":"RazerMouseWindow","source":"About"},{"context":"RazerMouseWindow","source":"About Razer Mouse Lite"},{"context":"RazerMouseWindow","source":"Huge thanks to the OpenRazer and openrazer-win communities for reverse-engineering the device protocols and sharing their work. This app builds on their efforts."},{"context":"RazerMouseWindow","source":"Want to help support a new device? OpenRazer explains how to capture and analyse USB traffic."},{"context":"RazerMouseWindow","source":"USB protocol reverse-engineering guide"},{"context":"RazerMouseWindow","source":"Update device definitions"},{"context":"RazerMouseWindow","source":"Checking device definitions…"},{"context":"RazerMouseWindow","source":"Could not update device definitions. Check your connection and try again."},{"context":"RazerMouseWindow","source":"These device definitions are incompatible or damaged. The current definitions have been kept."},{"context":"RazerMouseWindow","source":"Device definitions are up to date."},{"context":"RazerMouseWindow","source":"Could not save device definitions: %1"},{"context":"RazerMouseWindow","source":"Device definitions updated. No mouse settings were changed."}]
+[
+    {
+        "context": "Backend",
+        "source": "HID write failed: %1"
+    },
+    {
+        "context": "Backend",
+        "source": "HID read failed: %1"
+    },
+    {
+        "context": "Backend",
+        "source": "Mouse rejected command %1:%2 (status %3). Close other mouse software and try again."
+    },
+    {
+        "context": "Backend",
+        "source": "No confirmation from the mouse. Close other mouse software and try again."
+    },
+    {
+        "context": "Backend",
+        "source": "This diagnostic requires a wired Razer Cobra."
+    },
+    {
+        "context": "Backend",
+        "source": "Razer Cobra reports DPI X=%1, Y=%2. No settings changed."
+    },
+    {
+        "context": "Backend",
+        "source": "No supported mouse connected. Connect the mouse using USB and click Refresh."
+    },
+    {
+        "context": "Backend",
+        "source": "Polling rate is not supported for this model. Select Keep current."
+    },
+    {
+        "context": "Backend",
+        "source": "This lighting mode is not supported."
+    },
+    {
+        "context": "Backend",
+        "source": "Could not open mouse: %1"
+    },
+    {
+        "context": "Backend",
+        "source": "Profile '%1' applied · %2 DPI"
+    },
+    {
+        "context": "Backend",
+        "source": " Earlier hardware commands have not been rolled back."
+    },
+    {
+        "context": "Platform",
+        "source": "Incomplete HID transfer."
+    },
+    {
+        "context": "Platform",
+        "source": "Cannot access %1: %2. Install the supplied udev rule and reconnect the mouse."
+    },
+    {
+        "context": "Platform",
+        "source": "Mouse identity changed. Click Refresh and try again."
+    },
+    {
+        "context": "Platform",
+        "source": "Could not update automatic startup."
+    },
+    {
+        "context": "Platform",
+        "source": "Applies to the selected X11/libinput mouse. Games using raw input may ignore these settings."
+    },
+    {
+        "context": "Platform",
+        "source": "Pointer speed and acceleration are managed by your Wayland desktop, or require xinput on X11. DPI and lighting still work."
+    },
+    {
+        "context": "Platform",
+        "source": "Could not find the selected mouse in X11."
+    },
+    {
+        "context": "Platform",
+        "source": "Could not change the selected mouse's X11/libinput pointer settings."
+    },
+    {
+        "context": "Platform",
+        "source": "Applies to all mice. Games using raw input may ignore these settings."
+    },
+    {
+        "context": "Platform",
+        "source": "Could not read desktop pointer settings."
+    },
+    {
+        "context": "Platform",
+        "source": "Could not change pointer acceleration."
+    },
+    {
+        "context": "Platform",
+        "source": "Could not change pointer speed."
+    },
+    {
+        "context": "Profiles",
+        "source": "Profile"
+    },
+    {
+        "context": "Profiles",
+        "source": "Invalid profile file. The file will not be overwritten."
+    },
+    {
+        "context": "Profiles",
+        "source": "Everyday"
+    },
+    {
+        "context": "Profiles",
+        "source": "Precision"
+    },
+    {
+        "context": "Profiles",
+        "source": "Fast"
+    },
+    {
+        "context": "Profiles",
+        "source": "Could not create the settings folder."
+    },
+    {
+        "context": "Protocol",
+        "source": "DPI is outside this mouse's supported range."
+    },
+    {
+        "context": "Protocol",
+        "source": "This mouse supports DPI in steps of 100."
+    },
+    {
+        "context": "Protocol",
+        "source": "Unknown protocol argument."
+    },
+    {
+        "context": "Protocol",
+        "source": "Unknown protocol function: %1"
+    },
+    {
+        "context": "Protocol",
+        "source": "Invalid protocol index."
+    },
+    {
+        "context": "Protocol",
+        "source": "Invalid protocol step."
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "No supported USB mouse found"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "No profile applied yet"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Your mouse. Your settings. Done."
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Refresh"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Looking for USB mice…"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "PROFILES"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Click a profile to apply\nit immediately."
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "+ New"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Delete"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Profile name"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Sensor"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Sensitivity"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Keep current"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Polling rate"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Desktop pointer"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Include desktop pointer settings in this profile"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Speed"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Enable pointer acceleration"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Lighting"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Static color"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Off"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Effect / color"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Brightness"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Profile color"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Save"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Save and apply"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Save changes before switching profiles."
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Profile saved. Click the profile to apply it."
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "New profile"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Delete profile"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Delete profile '%1'?"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Cancel"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Start at login"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Restore active profile on startup / reconnect"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Language (restart required)"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "System language"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Language saved. Restart Razer Mouse Lite to apply it."
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Could not save the language preference."
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Choose a profile or edit its settings."
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Enter a profile name."
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Could not save: %1"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "No supported mouse connected. Connect the mouse using USB and click Refresh."
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Applying profile '%1'…"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Razer Mouse Lite · %1\nClick: next profile · Double-click: settings"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Open settings"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Quit"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Detected automatically · 100–%1 DPI · "
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "No RGB control for this model"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "DPI and lighting over USB"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Connect your Razer mouse using USB. You can save profiles in advance."
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "About"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "About Razer Mouse Lite"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Huge thanks to the OpenRazer and openrazer-win communities for reverse-engineering the device protocols and sharing their work. This app builds on their efforts."
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Want to help support a new device? OpenRazer explains how to capture and analyse USB traffic."
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "USB protocol reverse-engineering guide"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Update device definitions"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Checking device definitions…"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Could not update device definitions. Check your connection and try again."
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "These device definitions are incompatible or damaged. The current definitions have been kept."
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Device definitions are up to date."
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Could not save device definitions: %1"
+    },
+    {
+        "context": "RazerMouseWindow",
+        "source": "Device definitions updated. No mouse settings were changed."
+    }
+]

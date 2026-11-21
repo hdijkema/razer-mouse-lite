@@ -1,0 +1,34 @@
+[
+  {
+    "context": "Appearance",
+    "source": "Light"
+  },
+  {
+    "context": "Appearance",
+    "source": "Dark"
+  },
+  {
+    "context": "Appearance",
+    "source": "Follow system"
+  },
+  {
+    "context": "Appearance",
+    "source": "Skin"
+  },
+  {
+    "context": "Appearance",
+    "source": "Reload CSS"
+  },
+  {
+    "context": "Appearance",
+    "source": "Could not load the skin: %1"
+  },
+  {
+    "context": "Appearance",
+    "source": "Appearance saved."
+  },
+  {
+    "context": "Appearance",
+    "source": "Next profile"
+  }
+]

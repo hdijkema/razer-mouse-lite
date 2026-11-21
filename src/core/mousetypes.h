@@ -1,18 +1,11 @@
 #pragma once
-#include <QJsonObject>
-#include <QString>
-
+#include "common.h"
 struct MouseDevice
 {
-    QString path;
-    QString name;
-    QJsonObject model;
+    std::string path;
+    std::string name;
+    Json model;
     int pid = 0;
-    QString inputPath;
+    std::string inputPath;
 };
-
-struct ApplyResult
-{
-    bool success = false;
-    QString message;
-};
+struct ApplyResult { bool success = false; std::string message; };
