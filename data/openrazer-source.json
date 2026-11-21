@@ -1,19 +1,19 @@
 {
-    "format":  1,
-    "upstream":  "https://github.com/openrazer/openrazer",
-    "revision":  null,
-    "converterRevision":  "e4e79155e93cab4e4b52c876a40a72342727c984",
-    "protocolFiles":  {
-                          "driver/razerchromacommon.c":  "1a0c9be75e82f1bf09d19f10aa3df17387e56813a2dfc443314da241f7dbbe64",
-                          "driver/razerchromacommon.h":  "bb2b0417355b27ce3eb857e941c1a834366265f8ff38e0bd1b1d343fd803468c",
-                          "driver/razercommon.c":  "984c3f95cba20710e84f3eed8a26b1e2eddf0f8b6e5fe8bca51a32166744509e",
-                          "driver/razercommon.h":  "c69f69c21f81809584602fb364011b917897e90ffca5489f29f1dd6aa8ac0af5"
-                      },
-    "mouseFiles":  {
-                       "driver/razermouse_driver.c":  "",
-                       "driver/razermouse_driver.h":  "",
-                       "daemon/openrazer_daemon/hardware/mouse.py":  "",
-                       "daemon/openrazer_daemon/hardware/device_base.py":  ""
-                   },
-    "protocolRevision":  "ab2452847d12f4c789af040b17599012a0dd80b9"
+  "format": 1,
+  "upstream": "https://github.com/openrazer/openrazer",
+  "revision": "ab2452847d12f4c789af040b17599012a0dd80b9",
+  "converterRevision": "e4e79155e93cab4e4b52c876a40a72342727c984",
+  "protocolRevision": "ab2452847d12f4c789af040b17599012a0dd80b9",
+  "protocolFiles": {
+    "driver/razerchromacommon.c": "1a0c9be75e82f1bf09d19f10aa3df17387e56813a2dfc443314da241f7dbbe64",
+    "driver/razerchromacommon.h": "bb2b0417355b27ce3eb857e941c1a834366265f8ff38e0bd1b1d343fd803468c",
+    "driver/razercommon.c": "984c3f95cba20710e84f3eed8a26b1e2eddf0f8b6e5fe8bca51a32166744509e",
+    "driver/razercommon.h": "c69f69c21f81809584602fb364011b917897e90ffca5489f29f1dd6aa8ac0af5"
+  },
+  "mouseFiles": {
+    "driver/razermouse_driver.c": "836d5c8df8147d97312dd268c74fca71bda30e7d5cd7fbb751a07c8122e9f608",
+    "driver/razermouse_driver.h": "a4e6b9f0a1685ab8a57f7efc97fe0220d02902bbcba41ff549de50cbdecfb1a2",
+    "daemon/openrazer_daemon/hardware/mouse.py": "cbc86def6ff8c52d8092313fdf9b387cebec76141c3c8c4d48df76d1e5db30f3",
+    "daemon/openrazer_daemon/hardware/device_base.py": "38e224a8d149bbdc1da4f1d8ca8789c3ea22695aef9c196d3a2747b1354bea92"
+  }
 }
