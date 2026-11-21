@@ -214,6 +214,12 @@ A numeric tag such as `v0.3.0`, or a manual workflow run with a version, publish
 a GitHub Release only after all platform jobs succeed. Ordinary branch pushes
 do not publish a release.
 
+You can also create a release on GitHub with a tag such as `v0.3.0` and click
+**Publish release**. This builds the tagged commit and attaches the Windows ZIP,
+Windows installer, Ubuntu DEB and Debian 13 DEB to that release after all jobs
+succeed. Saving a draft does not start a build. The tagged commit must contain
+this workflow; versions use `X.Y.Z` or `vX.Y.Z` without suffixes.
+
 ## Credits and license
 
 Razer Mouse Lite is independent and is not affiliated with or endorsed by Razer.

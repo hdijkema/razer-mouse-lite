@@ -5,7 +5,8 @@ if ($project -notmatch 'project\(razer-mouse-lite VERSION ([0-9]+\.[0-9]+\.[0-9]
 $version = $Matches[1]
 $tag = ''
 $publish = $false
-if ($EventName -eq 'push' -and $RefType -eq 'tag') {
+if ($EventName -eq 'release' -and $RefType -ne 'tag') { throw 'A published release must reference a tag.' }
+if (($EventName -eq 'push' -or $EventName -eq 'release') -and $RefType -eq 'tag') {
     $tag = $RefName
     $version = $tag -creplace '^v', ''
     $publish = $true

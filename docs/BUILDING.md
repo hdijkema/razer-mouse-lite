@@ -212,3 +212,11 @@ automatically. The workflow now builds the FLTK app and uses Xvfb for screenshot
 
 A version tag or explicitly versioned manual release run publishes only after
 Windows, Ubuntu and Debian 13 jobs succeed. Normal pushes only build/test.
+
+Publishing a release through GitHub also starts this workflow (`release:
+published`). Select a tag such as `v0.3.0` pointing to a commit containing the
+workflow and click **Publish release**. The tag determines the package version;
+all four packages are uploaded to the existing release once every platform job
+passes. Its title and release notes are retained, and existing asset names are
+skipped on retries. Draft releases do not trigger builds. Tags must use `X.Y.Z`
+or `vX.Y.Z`, without prerelease suffixes or leading zeroes.
