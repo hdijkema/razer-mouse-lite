@@ -157,6 +157,12 @@ resizing stay in FLTK. Menus/scrollbars use FLTK's matching native drawing palet
 
 ## Tests and diagnostics
 
+The application icon uses `assets/razer-badge.svg`, embedded in the window and
+installed as a scalable Linux icon. To regenerate the checked-in Windows ICO
+(16 through 256 pixels) and Linux PNG after changing the SVG, build the optional
+`render-app-icon` target and run it with the `assets` directory as its argument.
+It uses FLTK's SVG renderer and requires no additional graphics tools.
+
     razer-mouse --self-test --language en --catalogues /path/to/translations
     razer-mouse --smoke-test preview.png --language nl --theme dark --skin mint
     razer-mouse --version

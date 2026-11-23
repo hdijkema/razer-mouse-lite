@@ -108,6 +108,7 @@
     "Device definitions updated. No mouse settings were changed.": "Device definitions updated. No mouse settings were changed."
   },
   "Appearance": {
+    "Close": "Close",
     "Light": "Light",
     "Dark": "Dark",
     "Follow system": "Follow system",

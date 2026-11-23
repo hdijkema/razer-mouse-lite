@@ -195,6 +195,8 @@ must also provide an indicator host (some GNOME desktops require an extension).
 The DEB recommends the runtime package; the executable works without it.
 
 With a working tray, closing the window hides it. Without one, closing exits.
+The window and tray use the SVG badge, with its background in the active profile
+color. The desktop shortcut and installer use the same badge in green.
 Windows supports click for the next profile and double-click for settings.
 On Linux, use the profile menu and **Next profile**; older AppIndicator versions
 open their menu on primary activation. This follows the platform-specific
@@ -223,7 +225,7 @@ this workflow; versions use `X.Y.Z` or `vX.Y.Z` without suffixes.
 ## Credits and license
 
 Razer Mouse Lite is independent and is not affiliated with or endorsed by Razer.
-Razer and Synapse names and the reused Synapse icon belong to Razer; the icon is
+Razer and Synapse names and the SVG badge logo belong to Razer; the logo is
 not covered by this project's GPL license.
 
 The code is **GPL-2.0-or-later**. Device/protocol information is adapted from

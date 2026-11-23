@@ -1,5 +1,7 @@
 #include "platform.h"
 #include "files.h"
+#include "trayicon.h"
+#include <FL/Fl_SVG_Image.H>
 #include <windows.h>
 #include <shellapi.h>
 #include <chrono>
@@ -9,6 +11,11 @@ std::wstring wide(const std::string& value) { return std::filesystem::u8path(val
 HICON profileIcon(Color color)
 {
     constexpr int size = 32;
+    const auto svg = Platform::profileIconSvg(color);
+    Fl_SVG_Image image(nullptr, svg.c_str());
+    if (image.fail()) return nullptr;
+    image.resize(size, size); image.normalize();
+    if (!image.array || image.d() != 4) return nullptr;
     BITMAPINFO info{}; info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER); info.bmiHeader.biWidth = size;
     info.bmiHeader.biHeight = -size; info.bmiHeader.biPlanes = 1; info.bmiHeader.biBitCount = 32;
     info.bmiHeader.biCompression = BI_RGB;
@@ -17,11 +24,11 @@ HICON profileIcon(Color color)
     if (!bitmap) return nullptr;
     auto* pixels = static_cast<DWORD*>(memory);
     for (int y = 0; y < size; ++y) for (int x = 0; x < size; ++x) {
-        const double nx = (x - 15.5) / 10.0, ny = (y - 15.5) / 14.0;
-        const double innerX = (x - 15.5) / 7.5, innerY = (y - 15.5) / 11.5;
-        const bool inside = nx * nx + ny * ny <= 1;
-        const bool border = innerX * innerX + innerY * innerY >= 1 || (x >= 15 && x <= 16 && y < 13) || (y >= 13 && y <= 14 && x >= 7 && x <= 24);
-        pixels[y * size + x] = !inside ? 0 : border ? 0xff000000u | (DWORD(color.r) << 16) | (DWORD(color.g) << 8) | color.b : 0xff17251cu;
+        const auto* rgba = image.array + (y * size + x) * 4;
+        const DWORD alpha = rgba[3];
+        // Windows HICON expects premultiplied BGRA, including antialiased edges.
+        pixels[y * size + x] = (alpha << 24) | ((rgba[0] * alpha / 255) << 16) |
+            ((rgba[1] * alpha / 255) << 8) | (rgba[2] * alpha / 255);
     }
     const unsigned char maskBits[size * size / 8]{};
     HBITMAP mask = CreateBitmap(size, size, 1, 1, maskBits);

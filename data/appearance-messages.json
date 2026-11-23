@@ -1,6 +1,10 @@
 [
   {
     "context": "Appearance",
+    "source": "Close"
+  },
+  {
+    "context": "Appearance",
     "source": "Light"
   },
   {

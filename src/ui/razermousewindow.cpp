@@ -4,6 +4,8 @@
 #include "files.h"
 #include <FL/Fl_Image_Surface.H>
 #include <FL/Fl_PNG_Image.H>
+#include <FL/Fl_SVG_Image.H>
+#include "trayicon.h"
 #include <FL/Fl_Color_Chooser.H>
 #include <FL/fl_ask.H>
 #include <FL/fl_draw.H>
@@ -355,6 +357,11 @@ void RazerMouseWindow::rebuildTray()
     items.push_back({}); items.push_back({tr("Appearance", "Next profile"), false, !readOnly && !busy() && !scan.valid(), -1});
     items.push_back({ui("Open settings"), false, true, -2}); items.push_back({ui("About"), false, true, -3}); items.push_back({ui("Quit"), false, true, -4});
     activeLabel->copy_label(name.c_str());
+    const auto svg = Platform::profileIconSvg(color);
+    Fl_SVG_Image icon(nullptr, svg.c_str());
+    icon.resize(64, 64); icon.normalize();
+    window.icon(&icon);
+    Fl_Window::default_icon(&icon);
     desktop.setTray(items, color, tr("RazerMouseWindow", "Razer Mouse Lite · %1\nClick: next profile · Double-click: settings", name));
 }
 void RazerMouseWindow::trayAction(int action)
@@ -467,8 +474,10 @@ void RazerMouseWindow::poll()
 }
 void RazerMouseWindow::showAbout()
 {
-    Fl_Css_Window about(css, window.x() + 120, window.y() + 100, 720, 360, nullptr);
+    Fl_Css_Window about(css, window.x() + 120, window.y() + 100, 720, 412, nullptr);
     about.copy_label(ui("About Razer Mouse Lite").c_str()); about.set_modal();
+    about.size_range(720, 412);
+    about.callback([](Fl_Widget* dialog, void*) { dialog->hide(); });
     label(css, 24, 18, 672, 42, "Razer Mouse Lite " MOUSE_LITE_VERSION, {"brand"});
     label(css, 24, 76, 672, 100, ui("Huge thanks to the OpenRazer and openrazer-win communities for reverse-engineering the device protocols and sharing their work. This app builds on their efforts."));
     label(css, 24, 184, 672, 64, ui("Want to help support a new device? OpenRazer explains how to capture and analyse USB traffic."), {"muted"});
@@ -479,7 +488,13 @@ void RazerMouseWindow::showAbout()
         link->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_WRAP);
         link->callback([](Fl_Widget*, void* uri) { char error[256]{}; fl_open_uri(static_cast<const char*>(uri), error, sizeof(error)); }, const_cast<char*>(links[i].first));
     }
-    about.end(); about.show(); while (about.shown()) Fl::wait();
+    // A resizable modal gets a native close button on Windows as well.
+    auto* spacer = new Fl_Css_Box(css, 24, 336, 672, 12);
+    auto* close = button(css, 576, 360, 120, 36, tr("Appearance", "Close"));
+    close->shortcut(FL_Enter);
+    close->callback([](Fl_Widget*, void* dialog) { static_cast<Fl_Window*>(dialog)->hide(); }, &about);
+    about.resizable(spacer);
+    about.end(); about.show(); close->take_focus(); while (about.shown()) Fl::wait();
 }
 bool RazerMouseWindow::uiContracts()
 {

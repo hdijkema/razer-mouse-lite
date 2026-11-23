@@ -1,5 +1,6 @@
 #include "platform.h"
 #include "files.h"
+#include "trayicon.h"
 #include <dlfcn.h>
 #include <fcntl.h>
 #include <sys/file.h>
@@ -213,13 +214,11 @@ void Platform::DesktopIntegration::setTray(const std::vector<TrayItem>& items, C
     if (data->menu) { api.destroy(data->menu); api.unref(data->menu); }
     data->menu = menu;
     const auto directory = Files::configDirectory() / "tray-icons";
-    const auto icon = directory / ("mouse-" + color.hex().substr(1) + ".svg");
+    const auto icon = directory / ("badge-v1-" + color.hex().substr(1) + ".svg");
     std::error_code ec;
     bool available = std::filesystem::exists(icon, ec);
     if (!available) {
-        const std::string svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\">"
-            "<rect x=\"6\" y=\"2\" width=\"20\" height=\"28\" rx=\"10\" fill=\"#19252b\" stroke=\"" + color.hex() +
-            "\" stroke-width=\"2\"/><path d=\"M16 3v10M6 14h20\" stroke=\"" + color.hex() + "\" stroke-width=\"2\"/></svg>";
+        const auto svg = profileIconSvg(color);
         available = Files::atomicWrite(icon, svg);
     }
     const auto description = tooltip.substr(0, tooltip.find('\n'));

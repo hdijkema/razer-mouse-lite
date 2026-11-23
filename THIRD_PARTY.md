@@ -53,9 +53,11 @@ the optional system xinput utility; neither is bundled with the Windows app.
 
 The Synapse icon in assets/razer-synapse.ico is copied unchanged from the user's
 local Razer Synapse installation (C:/ProgramData/Razer/Razer Synapse/Synapse.ico).
-assets/razer-mouse-lite.png is the embedded 256x256 PNG copied from that icon for Linux desktop use.
 The icon and Razer/Synapse trademarks belong to Razer and are not covered by this
 project's GPL license. Razer Mouse Lite is an independent application.
 
-The user-supplied assets/razer-badge.svg remains a reference asset. Razer owns the
-logo and trademark. Native tray icons are generated in the active profile color.
+The application uses the user-supplied assets/razer-badge.svg. Its generated
+assets/razer-mouse-lite.ico and assets/razer-mouse-lite.png are used for Windows
+resources/installer and Linux desktops. Razer owns the logo and trademark; these
+assets are not covered by the project's GPL license. Window and tray icons use
+the same SVG badge with its background in the active profile color.
