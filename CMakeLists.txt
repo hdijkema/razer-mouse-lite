@@ -31,6 +31,15 @@ FetchContent_MakeAvailable(fltk_css)
 set_property(DIRECTORY "${fltk_css_SOURCE_DIR}" PROPERTY EXCLUDE_FROM_ALL TRUE)
 set(BUILD_TESTING ${saved_testing})
 
+FetchContent_Declare(fltk_trayicon
+    GIT_REPOSITORY https://github.com/hdijkema/fltk-trayicon.git
+    GIT_TAG d0a334a0381a66b0b64e955df29d602575e00610
+    GIT_SUBMODULES "")
+set(FLTK_TRAYICON_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
+set(FLTK_TRAYICON_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(fltk_trayicon)
+set_property(DIRECTORY "${fltk_trayicon_SOURCE_DIR}" PROPERTY EXCLUDE_FROM_ALL TRUE)
+
 add_library(mouse_json INTERFACE)
 target_include_directories(mouse_json SYSTEM INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/data/mice.json" MOUSE_DATA)

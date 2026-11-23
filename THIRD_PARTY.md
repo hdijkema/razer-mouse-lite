@@ -24,6 +24,12 @@ from https://github.com/hdijkema/fltk-css at the pinned revision
 licenses/fltk-css-LGPL-2.1.txt contains its license.
 The application links both toolkits statically and provides its build sources.
 
+fltk-trayicon 0.1.0 provides the native tray backends under LGPL 2.1.
+Source: https://github.com/hdijkema/fltk-trayicon at pinned revision
+d0a334a0381a66b0b64e955df29d602575e00610.
+License: licenses/fltk-trayicon-LGPL-2.1.txt. The SVG and profile actions stay
+in this application; the library has no Razer-specific code.
+
 nlohmann/json 3.12.0 is a single vendored header under the MIT license.
 Source: https://github.com/nlohmann/json/tree/v3.12.0
 License: licenses/nlohmann-json-MIT.txt.
@@ -36,8 +42,9 @@ https://github.com/AyatanaIndicators/libayatana-appindicator
 https://curl.se/libcurl/
 
 The platform-specific tray design follows the author's local racket-tray project:
-Windows Shell_NotifyIconW, Linux AppIndicator/GTK3 loaded dynamically, and a future
-macOS AppKit status item backend. No Racket runtime or Racket source is bundled.
+Windows Shell_NotifyIconW, Linux AppIndicator/GTK3 loaded dynamically, and the
+library's macOS AppKit status item backend. The mouse application itself still
+requires a macOS device backend. No Racket runtime or source is bundled.
 
 Windows API documentation consulted:
 https://learn.microsoft.com/en-us/windows-hardware/drivers/hid/sending-hid-reports

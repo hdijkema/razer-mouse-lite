@@ -157,6 +157,13 @@ resizing stay in FLTK. Menus/scrollbars use FLTK's matching native drawing palet
 
 ## Tests and diagnostics
 
+Tray integration uses the separate `fltk-trayicon` CMake dependency. For local
+library development, configure with
+`-DFETCHCONTENT_SOURCE_DIR_FLTK_TRAYICON=C:/devel/razer/fltk-trayicon` (use your
+own checkout path). The application does not copy the library sources into its
+repository. Single-instance detection and the system appearance portal remain
+application platform code. The library handles native tray icons and menus.
+
 The application icon uses `assets/razer-badge.svg`, embedded in the window and
 installed as a scalable Linux icon. To regenerate the checked-in Windows ICO
 (16 through 256 pixels) and Linux PNG after changing the SVG, build the optional
