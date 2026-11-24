@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(razer-mouse-lite VERSION 0.3.2 LANGUAGES CXX)
+project(razer-mouse-lite VERSION 0.3.3 LANGUAGES CXX)
 set(MOUSE_LITE_VERSION "${PROJECT_VERSION}" CACHE STRING "Release version (X.Y.Z)")
 if(NOT MOUSE_LITE_VERSION MATCHES "^(0|[1-9][0-9]*)[.](0|[1-9][0-9]*)[.](0|[1-9][0-9]*)$")
     message(FATAL_ERROR "MOUSE_LITE_VERSION must be X.Y.Z without leading zeroes")
