@@ -34,8 +34,7 @@ These are individual users' reports about particular versions and setups, not
 benchmarks or a claim that every current Synapse installation behaves the same way.
 
 The app uses the C++ standard library and the header-only nlohmann/json parser.
-FLTK and fltk-css are statically linked in application builds. There is no Qt,
-web engine, translation compiler or runtime JSON dependency. No performance
+FLTK and fltk-css are statically linked in application builds. No performance
 comparison with Synapse is claimed without measurements.
 
 ## What you can do
@@ -151,7 +150,7 @@ operating system, and the error shown in the app.
 
 English, Dutch, German, Danish, Norwegian Bokmål, Swedish, French, and Spanish are
 included. The app follows your system language, with English as the fallback.
-Choose a different language in settings and restart the app to apply it. Translation catalogues are embedded JSON; Qt Linguist is not required. Existing
+Choose a different language in settings and restart the app to apply it. Translation catalogues are embedded JSON. Existing
 profile names are your own text and are not translated. Native system dialogs may
 follow the operating system's language.
 

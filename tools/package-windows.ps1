@@ -17,7 +17,6 @@ $application = Join-Path $fixture 'RazerMouseLite'
 New-Item -ItemType Directory -Path $application -Force | Out-Null
 Copy-Item -LiteralPath $executable -Destination $application
 Copy-Item -LiteralPath (Join-Path $BuildDirectory 'skins') -Destination $application -Recurse
-if (Get-ChildItem -LiteralPath $BuildDirectory -Filter 'Qt*.dll') { throw 'This distribution must not contain Qt DLLs. Use a fresh FLTK build directory.' }
 $vswhere = "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
 $visualStudio = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
 if ($LASTEXITCODE -ne 0 -or !$visualStudio) { throw 'Visual Studio C++ runtime location could not be determined.' }

@@ -1,8 +1,7 @@
 # Building Razer Mouse Lite
 
 The application uses C++17, FLTK 1.4 and fltk-css. nlohmann/json 3.12.0 is
-vendored as a single header. No Qt SDK, plugins, DLLs or translation tools are
-used. Windows and Linux have platform implementations.
+vendored as a single header. Windows and Linux have platform implementations.
 
 ## Prerequisites
 
@@ -201,8 +200,8 @@ listed mouse or operating system.
 - translations: eight editable UTF-8 JSON catalogues.
 - tests: protocol, persistence, translations, UI, boundaries, release and installer checks.
 
-The boundary check rejects direct native OS headers outside platform and Qt
-includes in shared modules. Existing windowsSettings profile fields are migrated
+The boundary check rejects direct native OS headers in shared modules outside
+the platform implementation. Existing windowsSettings profile fields are migrated
 to pointerSettings while reading.
 
 ## Device definitions and weekly updates
