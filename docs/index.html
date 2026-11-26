@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-theme-key="razer-mouse-lite-theme">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Razer Mouse Lite: an unofficial, focused USB mouse settings app. Adjust DPI, lighting and local profiles without a software suite.">
+  <meta name="theme-color" content="#176c42">
+  <title>Razer Mouse Lite &mdash; Your mouse. Your settings. Done.</title>
+  <meta property="og:title" content="Razer Mouse Lite">
+  <meta property="og:description" content="Your mouse settings should not need a software suite. DPI, lighting and local profiles in a focused native app.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <script src="theme.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="container site-header">
+    <a class="brand" href="./"><img src="assets/logo.svg" width="42" height="42" alt=""><span>Razer Mouse Lite</span></a>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" hidden>Light theme</button>
+    <nav aria-label="Main navigation"><a href="#features">Features</a><a href="#download">Download</a><a href="USER-GUIDE.html">Guide</a><a href="https://github.com/hdijkema/razer-mouse-lite">GitHub &nearr;</a></nav>
+  </header>
+  <main class="container" id="main">
+    <section class="hero app-hero" aria-labelledby="hero-title">
+      <div class="hero-copy"><p class="eyebrow">Your mouse. Your settings. Done.</p>
+        <h1 id="hero-title">Razer<br><span>Mouse Lite</span></h1>
+        <p class="tagline">A few settings.<br>Then back to work.</p>
+        <p class="lead">A focused, unofficial settings app for supported Razer USB mice. Set your DPI, choose a color and keep your profiles on your own computer.</p>
+        <div class="actions"><a class="button" href="#download">Get the app <span aria-hidden="true">&darr;</span></a><a class="text-link" href="USER-GUIDE.html">Read the guide &rarr;</a></div>
+        <p class="meta">Windows &middot; Linux packages &middot; Open source</p>
+      </div>
+      <figure class="app-screenshot"><a href="images/settings.png" aria-label="Open the settings screenshot at full size"><img class="settings-shot-light" src="images/settings-light.png" width="1100" height="828" alt="Razer Mouse Lite showing local profiles, DPI, lighting and desktop pointer settings for a wired Razer Cobra"><img class="settings-shot-dark" src="images/settings.png" width="1100" height="828" alt="Razer Mouse Lite showing local profiles, DPI, lighting and desktop pointer settings for a wired Razer Cobra"></a><figcaption>The actual settings window &middot; Mint skin</figcaption></figure>
+    </section>
+    <div class="quiet-strip"><span>Local profiles</span><span>No account</span><span>No telemetry</span><span>No background update checks</span></div>
+    <section class="features" id="features" aria-label="Application features">
+      <article><span class="feature-number">01</span><h2>Make it feel right</h2><p>Set sensitivity, choose a supported polling rate and adjust desktop pointer settings where your operating system permits.</p></article>
+      <article><span class="feature-number">02</span><h2>Keep the lighting simple</h2><p>Choose a static color and brightness, turn lighting off, or keep the mouse's current lighting.</p></article>
+      <article><span class="feature-number">03</span><h2>Switch with your day</h2><p>Save local profiles and apply them with a click. Use the tray menu to switch without reopening the settings window.</p></article>
+    </section>
+    <section class="app-start" aria-labelledby="start-title"><div><p class="eyebrow">From USB to your settings</p><h2 class="section-title" id="start-title">One window.<br>A small job, done.</h2><p>Starting at login and restoring your last profile are separate options. You choose whether either happens.</p><a class="text-link" href="USER-GUIDE.html">Explore the settings &rarr;</a></div><ol class="steps"><li><span>01</span><div><h3>Connect your mouse</h3><p>Plug in a supported USB mouse. The app detects it automatically.</p></div></li><li><span>02</span><div><h3>Choose your profile</h3><p>Create one or select a saved profile, then adjust the settings you need.</p></div></li><li><span>03</span><div><h3>Save and apply</h3><p>Apply it now, or use Save to keep your edits for later.</p></div></li></ol></section>
+    <section class="app-download" id="download" aria-labelledby="download-title"><p class="eyebrow">Download</p><h2 class="section-title" id="download-title">Choose your desktop.</h2><div class="packages"><article><span class="package-label">x64</span><h3>Windows</h3><p>Installer or portable ZIP. Extract the whole portable folder before running the app.</p><a href="https://github.com/hdijkema/razer-mouse-lite/releases/latest">Windows downloads &nearr;</a></article><article><span class="package-label">x86-64 / amd64</span><h3>Linux</h3><p>Separate DEB packages for Ubuntu 24.04 and Debian 13. Choose the package for your distribution.</p><a href="https://github.com/hdijkema/razer-mouse-lite/releases/latest">Linux downloads &nearr;</a></article></div><p class="download-note">Packages and release notes are on GitHub. See the <a href="BUILDING.html#linux">Linux setup guide</a> for device permissions and tray dependencies.</p></section>
+    <section class="support-note" aria-labelledby="support-title"><p class="eyebrow">Device support</p><div><h2 id="support-title">Start with what is tested.</h2><p>The wired Razer Cobra is the hardware reference tested on Windows. Other mice have device definitions, but a database entry does not guarantee every feature on every model. Bluetooth is not supported.</p><p>Physical Linux mouse testing is still needed in addition to CI. The <a href="USER-GUIDE.html#device-support">device support guide</a> explains the current limits and what to include in an issue report.</p></div></section>
+    <section class="reading" aria-labelledby="reading-title"><div><p class="eyebrow">A closer look</p><h2 id="reading-title">Your settings, explained.</h2><p>Profiles, startup behavior, skins and device support. Everything stays documented alongside the application.</p></div><div class="reading-links"><a href="USER-GUIDE.html">User guide <span>&rarr;</span></a><a href="BUILDING.html">Build &amp; development <span>&rarr;</span></a><a href="https://github.com/hdijkema/razer-mouse-lite/issues">Issues &amp; feedback <span>&nearr;</span></a></div></section>
+  </main>
+  <footer class="container site-footer"><span>Independent software. Not affiliated with or endorsed by Razer.</span><span><a href="https://github.com/hdijkema/razer-mouse-lite/blob/main/LICENSE">GPL-2.0-or-later</a> &middot; <a href="https://github.com/hdijkema/razer-mouse-lite/blob/main/THIRD_PARTY.md">Credits &amp; notices</a></span></footer>
+</body>
+</html>

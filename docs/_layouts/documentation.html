@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-theme-key="razer-mouse-lite-theme">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page.title | default: page.name | remove: '.md' | escape }} &middot; {{ site.title | escape }}</title>
+  <meta name="description" content="User guide, build instructions and development documentation for {{ site.title | escape }}.">
+  <link rel="icon" href="{{ '/assets/logo.svg' | relative_url }}" type="image/svg+xml">
+  <script src="{{ '/theme.js' | relative_url }}"></script>
+  <link rel="stylesheet" href="{{ '/style.css' | relative_url }}">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="container site-header">
+    <a class="brand" href="{{ '/' | relative_url }}"><img src="{{ '/assets/logo.svg' | relative_url }}" width="42" height="42" alt=""><span>{{ site.title | escape }}</span></a>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" hidden>Light theme</button>
+    <nav aria-label="Main navigation"><a href="{{ '/' | relative_url }}">Home</a><a href="{{ '/USER-GUIDE.html' | relative_url }}">User guide</a><a href="{{ site.repository_url }}">GitHub &nearr;</a></nav>
+  </header>
+  <main class="container docs-page" id="main">
+    {% assign repository_path = site.repository_url | append: '/blob/main/' %}
+    {% assign source_link = 'href="' | append: repository_path %}
+    {{ content | replace: 'href="../', source_link }}
+  </main>
+  <footer class="container site-footer"><a href="{{ '/' | relative_url }}">&larr; {{ site.title | escape }}</a><a href="{{ site.repository_url }}/blob/main/docs/{{ page.name }}">View source documentation &nearr;</a></footer>
+</body>
+</html>

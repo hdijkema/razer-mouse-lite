@@ -1,5 +1,9 @@
 # Razer Mouse Lite
 
+<img src="docs/assets/logo.svg" width="80" height="80" alt="Razer Mouse Lite website logo">
+
+[Homepage](https://hdijkema.github.io/razer-mouse-lite/) | [User guide](docs/USER-GUIDE.md)
+
 **Your mouse settings should not need a software suite.**
 
 A focused, unofficial Razer mouse settings app for Windows and Linux, written in

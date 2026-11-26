@@ -1,0 +1,15 @@
+title: Razer Mouse Lite
+url: https://hdijkema.github.io
+baseurl: /razer-mouse-lite
+repository_url: https://github.com/hdijkema/razer-mouse-lite
+markdown: kramdown
+kramdown:
+  input: GFM
+plugins:
+  - jekyll-optional-front-matter
+  - jekyll-relative-links
+defaults:
+  - scope:
+      path: "**/*.md"
+    values:
+      layout: documentation
